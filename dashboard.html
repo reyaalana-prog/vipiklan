@@ -30,7 +30,7 @@
         </header>
 
         <div id="premiumArea" style="display: none;">
-            <h3 id="playingTitle">Memuat Pemutar Video... 🍿</h3>
+            <h3 id="playingTitle">Selamat menonton dan siapkan tisu 🍿</h3>
             <div class="video-box">
                 <iframe id="bunnyPlayer" src="" 
                         loading="lazy" style="border:0;position:absolute;top:0;left:0;height:100%;width:100%;" 
@@ -77,7 +77,6 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                // FIX LOGIKA DI SINI: Menghapus typo kata 'granite'
                 if (tanggalMasaAktif > sekarang) {
                     document.getElementById('premiumArea').style.display = 'block';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
@@ -106,13 +105,12 @@
 
                 if (!videos || !Array.isArray(videos) || videos.length === 0) {
                     container.innerHTML = '<p style="color: #aaa;">Belum ada video yang siap diputar. Silakan tunggu proses encoding di Bunny.net selesai.</p>';
-                    document.getElementById('playingTitle').innerText = 'Katalog Video Kosong 🍿';
                     return;
                 }
 
                 // 1. Set video pertama secara default ke dalam player utama
                 if (videos[0] && videos[0].guid) {
-                    playVideo(videos[0].guid, videos[0].title);
+                    playVideo(videos[0].guid);
                 }
 
                 // 2. Tampilkan semua list video ke dalam bentuk grid/kartu film
@@ -125,11 +123,10 @@
 
                     const card = document.createElement('div');
                     card.className = 'video-card';
-                    card.onclick = () => playVideo(video.guid, video.title);
+                    card.onclick = () => playVideo(video.guid);
                     
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
-                    // Menampilkan gambar katalog & durasi saja tanpa judul video
                     card.innerHTML = `
                         <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
                         <div class="video-info">
@@ -145,8 +142,9 @@
         }
 
         // Fungsi Mengganti Link Player saat Video di dalam Katalog diklik
-        function playVideo(videoId, title) {
-            document.getElementById('playingTitle').innerText = `Menonton: ${title || 'Video Premium'} 🍿`;
+        function playVideo(videoId) {
+            // Judul diubah agar tetap konstan "Selamat menonton dan siapkan tisu" setiap kali ganti video
+            document.getElementById('playingTitle').innerText = "Selamat menonton dan siapkan tisu 🍿";
             const player = document.getElementById('bunnyPlayer');
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
         }
