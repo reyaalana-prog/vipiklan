@@ -77,7 +77,8 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                if (tanggalMasaAktif > granite = tanggalMasaAktif > sekarang) {
+                // FIX LOGIKA DI SINI: Menghapus typo kata 'granite'
+                if (tanggalMasaAktif > sekarang) {
                     document.getElementById('premiumArea').style.display = 'block';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     
@@ -128,7 +129,7 @@
                     
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
-                    // DI SINI KITA HAPUS BAGIAN JUDULNYA, CUMA MENYISAKAN GAMBAR & DURASI
+                    // Menampilkan gambar katalog & durasi saja tanpa judul video
                     card.innerHTML = `
                         <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
                         <div class="video-info">
@@ -145,7 +146,6 @@
 
         // Fungsi Mengganti Link Player saat Video di dalam Katalog diklik
         function playVideo(videoId, title) {
-            // Judul asli video bawaan file tetap akan muncul di atas PLAYER UTAMA saat diputar
             document.getElementById('playingTitle').innerText = `Menonton: ${title || 'Video Premium'} 🍿`;
             const player = document.getElementById('bunnyPlayer');
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
