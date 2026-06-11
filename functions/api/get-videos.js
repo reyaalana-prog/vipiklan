@@ -1,14 +1,13 @@
 export async function onRequestGet(context) {
   const { env } = context;
 
-  // Data Bunny.net milik Arlyn
+  // Data Bunny.net milik Arlyn (Sesuai Dokumentasi Resmi)
   const LIBRARY_ID = "680881"; 
   const API_KEY = "e33bda09-efca-431a-ab6a-20503328-432f-4fc6"; 
 
   try {
-    // ENDPOINT RESMI PUSAT: Menggunakan /videolibrary/{id}/videos
-    // Ini jalur manajemen video resmi jika ditembak dari api.bunny.net global
-    const response = await fetch(`https://api.bunny.net/videolibrary/${LIBRARY_ID}/videos?page=1&perPage=100`, {
+    // JALUR RESMI MUTLAK: Menggunakan domain video.bunnycdn.com
+    const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos?page=1&perPage=100`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -36,7 +35,7 @@ export async function onRequestGet(context) {
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 200, // Tetap gunakan status 200 agar teks error asli bisa keluar di front-end
+      status: 200, // Tetap gunakan status 200 agar front-end bisa membaca teks eror jika ada typo
       headers: { 
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
