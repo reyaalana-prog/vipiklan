@@ -1,11 +1,9 @@
-// PIN rahasia untuk masuk ke halaman admin kamu
 const ADMIN_PIN_RAHASIA = "123456"; 
 
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   
-  // Ambil PIN dari header atau parameter untuk validasi admin
   const inputPin = request.headers.get("X-Admin-PIN") || url.searchParams.get("pin");
   
   if (inputPin !== ADMIN_PIN_RAHASIA) {
@@ -15,7 +13,6 @@ export async function onRequest(context) {
     });
   }
 
-  // Ambil binding database D1 milik Arlyn
   const db = env.DB;
   if (!db) {
     return new Response(JSON.stringify({ error: "Environment variable 'DB' (Cloudflare D1) tidak ditemukan!" }), { 
@@ -24,11 +21,11 @@ export async function onRequest(context) {
     });
   }
 
-  // --- OPSI 1: JIKA MENERIMA REQUEST GET (AMBIL SEMUA USER DARI D1) ---
+  // --- OPSI 1: JIKA MENERIMA REQUEST GET (AMBIL USER) ---
   if (request.method === "GET") {
     try {
-      // Mengambil data user dari tabel 'users' di D1 kamu, diurutkan dari yang terbaru
-      const { results } = await db.prepare("SELECT username, subUntil FROM users ORDER BY rowid DESC").all();
+      // FIX MUTLAK: Mengubah nama kolom menjadi 'subscription_until' sesuai database asli Arlyn
+      const { results } = await db.prepare("SELECT username, subscription_until AS subUntil FROM users ORDER BY rowid DESC").all();
       
       return new Response(JSON.stringify(results), {
         status: 200,
@@ -42,7 +39,7 @@ export async function onRequest(context) {
     }
   }
 
-  // --- OPSI 2: JIKA MENERIMA REQUEST POST (UPDATE MASA AKTIF USER DI D1) ---
+  // --- OPSI 2: JIKA MENERIMA REQUEST POST (UPDATE MASA AKTIF) ---
   if (request.method === "POST") {
     try {
       const body = await request.json();
@@ -52,8 +49,8 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: "Data kurang lengkap." }), { status: 400 });
       }
 
-      // Update kolom subUntil di database D1 berdasarkan username
-      const info = await db.prepare("UPDATE users SET subUntil = ? WHERE username = ?")
+      // FIX MUTLAK: Mengubah SET menjadi 'subscription_until'
+      const info = await db.prepare("UPDATE users SET subscription_until = ? WHERE username = ?")
                           .bind(new_sub_until, username)
                           .run();
 
