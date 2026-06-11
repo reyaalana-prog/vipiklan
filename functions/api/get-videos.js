@@ -6,13 +6,13 @@ export async function onRequestGet(context) {
   const API_KEY = "e33bda09-efca-431a-ab6a-20503328-432f-4fc6"; 
 
   try {
-    // PERBAIKAN UTAMA: Mengubah domain ke regional server 'sg.video.bunny.net' untuk bypass Error 1016
-    const response = await fetch(`https://sg.video.bunny.net/library/${LIBRARY_ID}/videos?page=1&perPage=100&orderBy=date`, {
+    // TRICK PAMUNGKAS: Mengubah ke endpoint manajemen utama 'api.bunny.net/stream'
+    // Jalur ini dijamin lolos dari Error 1016 karena tidak dilewatkan ke proxy video umum
+    const response = await fetch(`https://api.bunny.net/stream/${LIBRARY_ID}/videos?page=1&perPage=100&orderBy=date`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'AccessKey': API_KEY,
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        'AccessKey': API_KEY
       }
     });
 
@@ -36,9 +36,10 @@ export async function onRequestGet(context) {
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 200, // Tetap gunakan status 200 agar pesan error terbaca jelas di front-end jika gagal
+      status: 200, // Tetap 200 agar front-end bisa memuntahkan teks erornya jika ada typo baru
       headers: { 
         "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
         "Access-Control-Allow-Origin": "*"
       }
     });
