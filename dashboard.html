@@ -8,7 +8,7 @@
         /* Gaya tampilan sederhana biar rapi */
         body { font-family: sans-serif; background: #141414; color: white; text-align: center; padding: 20px; }
         .container { max-width: 800px; margin: 0 auto; }
-        .video-box { background: #000; width: 100%; aspect-ratio: 16/9; margin: 20px auto; display: flex; align-items: center; justify-content: center; border: 2px solid #333; }
+        .video-box { background: #000; width: 100%; aspect-ratio: 16/9; margin: 20px auto; display: flex; align-items: center; justify-content: center; border: 2px solid #333; position: relative; }
         .alert-expired { color: #ff4d4d; background: #2a1b1b; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; margin-top: 30px; }
         .btn { background: #e50914; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 15px; border-radius: 4px; }
         .btn-logout { background: #333; font-size: 14px; padding: 5px 10px; margin-left: 10px; }
@@ -25,7 +25,7 @@
             <h3>Selamat Menonton! Video Premium Tanpa Iklan 🍿</h3>
             <div class="video-box">
                 <iframe src="https://iframe.mediadelivery.net/embed/236166/703b4146-24cc-4043-bc8c-f9479b1df093?autoplay=false&loop=false&muted=false&preload=true&responsive=true" 
-                        loading="lazy" style="border:0;position:absolute;top:0;height:100%;width:100%;" 
+                        loading="lazy" style="border:0;position:absolute;top:0;left:0;height:100%;width:100%;" 
                         allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;" 
                         allowfullscreen="true">
                 </iframe>
@@ -54,20 +54,21 @@
             // Tampilkan nama user di header
             document.getElementById('userDisplay').innerText = username;
             
-            // 2. Logika Cek Masa Aktif
-            const sekarang = new Date();
+            // 2. Logika Cek Masa Aktif Berbasis Milidetik (Antimental)
+            const sekarang = new Date().getTime();
             
-            // Jika di database statusnya null (berarti user baru mendaftar dan belum bayar sama sekali)
             if (!subUntil || subUntil === 'expired' || subUntil === 'null') {
                 document.getElementById('expiredArea').style.display = 'block';
             } else {
-                const tanggalMasaAktif = new Date(subUntil);
+                // Ubah spasi menjadi 'T' agar format tanggal dibaca seragam sebagai waktu lokal oleh semua browser
+                const formatTanggalDb = subUntil.replace(" ", "T");
+                const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                // Bandingkan tanggal masa aktif dengan waktu sekarang
+                // Bandingkan angka milidetiknya
                 if (tanggalMasaAktif > sekarang) {
                     // Masa aktif masih valid! Tampilkan video player
                     document.getElementById('premiumArea').style.display = 'block';
-                    document.getElementById('dateDisplay').innerText = tanggalMasaAktif.toLocaleString('id-ID');
+                    document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                 } else {
                     // Masa aktif sudah lewat / kedaluwarsa
                     document.getElementById('expiredArea').style.display = 'block';
@@ -75,11 +76,11 @@
             }
         }
 
-        // Fungsi Tombol Logout
+        // Fungsi Tombol Logout (Diubah jalurnya ke /login biar ga 404)
         function logout() {
             sessionStorage.clear(); // Bersihkan semua session login
             alert('Kamu telah keluar.');
-            window.location.href = 'login.html';
+            window.location.href = '/login';
         }
     </script>
 </body>
