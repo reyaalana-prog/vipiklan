@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Akun Premium</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Daftar Akun Streaming</h2>
+        <p>Saksikan video premium tanpa iklan terganggu</p>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Masukkan username">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Masukkan email aktif">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Buat password baru">
+            </div>
+            
+            <button type="submit" class="btn-auth">Daftar Sekarang</button>
+        </form>
+        
+        <p class="auth-link">Sudah punya akun? <a href="login.html">Login di sini</a></p>
+    </div>
+
+    <script>
+        // Nanti di sini kita pasang script JavaScript untuk kirim data ke Cloudflare D1
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alert('Form pendaftaran siap dihubungkan ke backend!');
+        });
+    </script>
+</body>
+</html>
