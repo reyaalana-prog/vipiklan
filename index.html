@@ -24,10 +24,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* ✅ TAUTAN GAMBAR BARU UTK BACKGROUND FULL DARI ATAS SAMPAI BAWAH */
             background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
             background-size: cover;
-            /* 🛠️ TINGKAT BLUR DIKURANGI AGAR GAMBAR LEBIH JELAS & TIDAK TERPOTONG */
             filter: blur(3px) brightness(0.3); 
             transform: scale(1.02);
             z-index: -2; /* Di paling belakang kodingan */
@@ -267,6 +265,38 @@
             border-top: 1px solid #222;
             position: relative;
             z-index: 2;
+        }
+
+        /* 🛠️ TAMBAHAN BARU: CSS KHUSUS TAMPILAN HP (MOBILE RESPONSIVE) */
+        @media (max-width: 480px) {
+            .hero-section h1 {
+                font-size: 36px; /* Perkecil judul di HP agar tidak meluber */
+            }
+            .hero-section p {
+                font-size: 15px;
+                margin-bottom: 25px;
+            }
+            .btn-main {
+                padding: 14px 28px;
+                font-size: 16px;
+                width: 90%; /* Tombol menyesuaikan lebar HP */
+                box-sizing: border-box;
+            }
+            .features-section h2, .pricing-section h2 {
+                font-size: 22px;
+            }
+            .pricing-grid {
+                flex-direction: column; /* Kartu paket berjejer ke bawah murni */
+                align-items: center;
+                gap: 25px;
+            }
+            .price-card {
+                max-width: 100%; /* Kartu paket melebar penuh sesuai layar HP */
+                width: 90%;
+            }
+            .price-card.popular {
+                transform: scale(1); /* Matikan scale di HP biar tidak menabrak kartu lain */
+            }
         }
     </style>
 </head>
