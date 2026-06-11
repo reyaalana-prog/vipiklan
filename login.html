@@ -52,7 +52,7 @@
                     sessionStorage.setItem('subUntil', data.user.subscription_until || 'expired');
 
                     // Lempar user ke halaman utama streaming (dashboard.html)
-                    window.location.href = 'dashboard.html';
+                    window.location.href = '/dashboard';
                 } else {
                     alert('Gagal: ' + data.error);
                 }
