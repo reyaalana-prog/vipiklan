@@ -14,50 +14,82 @@
             padding: 0;
         }
 
-        /* 2. HERO SECTION (BAGIAN ATAS) */
+        /* 2. HERO SECTION DENGAN EFEK BLUR SINEMATIK */
         .hero-section {
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            min-height: 70vh;
+            min-height: 75vh;
             padding: 40px 20px;
-            background: linear-gradient(rgba(20,20,20,0.6), #141414), url('https://via.placeholder.com/1200x600/000/333?text=STREAMINGKU+PREMIUM');
-            background-size: cover;
-            background-position: center;
             box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Wadah Khusus Background Biar Gambarnya Saja Yang Nge-blur, Tulisan Di Depan Tetap Tajam */
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* ⚠️ GANTI LINK DI BAWAH INI DENGAN GAMBAR KOLASE FILM PREMIUM PILIHANMU */
+            background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center center;
+            background-size: cover;
+            filter: blur(8px) brightness(0.4); /* 🔥 Menghasilkan efek blur halus + agak gelap (remang-remang) */
+            transform: scale(1.05); /* Sedikit diperbesar agar pinggiran blur tidak bocor putih keluar layar */
+            z-index: 1;
+        }
+
+        /* Lapisan Gradasi Gelap Tambahan (Overlay) */
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(20,20,20,0.2) 0%, #141414 100%);
+            z-index: 2;
+        }
+
+        /* Konten Tulisan Harus Naik ke Atas z-index Background */
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 650px;
         }
 
         .hero-section h1 {
-            color: #e50914; /* Merah Netflix Style */
-            font-size: 48px;
+            color: #e50914; /* Merah Bold Khas Bioskop */
+            font-size: 52px;
             margin: 0 0 15px 0;
             font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.7);
+            letter-spacing: 3px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.9);
         }
 
         .hero-section p {
             font-size: 18px;
-            color: #eee;
-            max-width: 600px;
+            color: #fff;
             line-height: 1.6;
-            margin-bottom: 30px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            margin-bottom: 35px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
         }
 
         .btn-main {
             text-decoration: none;
             background: #e50914;
             color: white;
-            padding: 16px 35px;
+            padding: 16px 38px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 8px;
-            box-shadow: 0 6px 15px rgba(229,9,20,0.4);
+            box-shadow: 0 6px 20px rgba(229,9,20,0.5);
             transition: 0.2s;
             display: inline-block;
+            letter-spacing: 0.5px;
         }
 
         .btn-main:active {
@@ -238,9 +270,14 @@
 <body>
 
     <div class="hero-section">
-        <h1>STREAMINGKU</h1>
-        <p>Saksikan ratusan koleksi video premium kualitas super jernih tanpa gangguan jeda iklan. Daftar sekarang dan mulai maraton menonton!</p>
-        <a href="/register" class="btn-main">MULAI NONTON SEKARANG</a>
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <h1>STREAMINGKU</h1>
+            <p>Saksikan ratusan koleksi video premium kualitas super jernih tanpa gangguan jeda iklan. Daftar sekarang dan mulai maraton menonton!</p>
+            <a href="/register" class="btn-main">MULAI NONTON SEKARANG</a>
+        </div>
     </div>
 
     <div class="features-section">
@@ -310,11 +347,9 @@
     </footer>
 
     <script>
-        // 👀 CEK STATUS LOGIN OTOMATIS
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const username = sessionStorage.getItem('username');
 
-        // Jika user ternyata sudah login sebelumnya, langsung lempar ke dashboard tanpa loading lama
         if (isLoggedIn === 'true' && username) {
             window.location.href = '/dashboard';
         }
