@@ -28,18 +28,18 @@
             overflow: hidden;
         }
 
-        /* Wadah Khusus Background Biar Gambarnya Saja Yang Nge-blur, Tulisan Di Depan Tetap Tajam */
+        /* Wadah Khusus Background */
         .hero-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* ⚠️ GANTI LINK DI BAWAH INI DENGAN GAMBAR KOLASE FILM PREMIUM PILIHANMU */
-            background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center center;
+            /* 🛠️ SUDAH DI-FIX: Mengubah posisi background menjadi 'center top' agar bagian atas gambar kelihatan utuh */
+            background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
             background-size: cover;
-            filter: blur(8px) brightness(0.4); /* 🔥 Menghasilkan efek blur halus + agak gelap (remang-remang) */
-            transform: scale(1.05); /* Sedikit diperbesar agar pinggiran blur tidak bocor putih keluar layar */
+            filter: blur(8px) brightness(0.4); 
+            transform: scale(1.05); 
             z-index: 1;
         }
 
@@ -54,7 +54,7 @@
             z-index: 2;
         }
 
-        /* Konten Tulisan Harus Naik ke Atas z-index Background */
+        /* Konten Tulisan */
         .hero-content {
             position: relative;
             z-index: 3;
@@ -62,7 +62,7 @@
         }
 
         .hero-section h1 {
-            color: #e50914; /* Merah Bold Khas Bioskop */
+            color: #e50914; 
             font-size: 52px;
             margin: 0 0 15px 0;
             font-weight: bold;
