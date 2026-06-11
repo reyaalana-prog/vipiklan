@@ -6,9 +6,8 @@ export async function onRequestGet(context) {
   const API_KEY = "e33bda09-efca-431a-ab6a-20503328-432f-4fc6"; 
 
   try {
-    // TRICK PAMUNGKAS: Mengubah ke endpoint manajemen utama 'api.bunny.net/stream'
-    // Jalur ini dijamin lolos dari Error 1016 karena tidak dilewatkan ke proxy video umum
-    const response = await fetch(`https://api.bunny.net/stream/${LIBRARY_ID}/videos?page=1&perPage=100&orderBy=date`, {
+    // PERBAIKAN FINAL: Menambahkan /manage/ sebelum /videos sesuai dokumentasi api.bunny.net
+    const response = await fetch(`https://api.bunny.net/stream/${LIBRARY_ID}/manage/videos?page=1&perPage=100&orderBy=date`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -23,7 +22,7 @@ export async function onRequestGet(context) {
 
     const data = await response.json();
 
-    // Kirim daftar video ke front-end website kita dengan tambahan header CORS
+    // Kirim daftar video ke front-end website kita
     return new Response(JSON.stringify(data.items), {
       status: 200,
       headers: { 
@@ -36,7 +35,7 @@ export async function onRequestGet(context) {
 
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 200, // Tetap 200 agar front-end bisa memuntahkan teks erornya jika ada typo baru
+      status: 200, // Tetap gunakan 200 agar teks terbaca di front-end
       headers: { 
         "Content-Type": "application/json",
         "Cache-Control": "no-cache",
