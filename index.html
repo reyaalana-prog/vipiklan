@@ -5,59 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STREAMINGKU - Platform Video Premium Tanpa Iklan</title>
     <style>
-        /* 1. SETUP DASAR & BACKDROP */
+        /* 1. SETUP BACKGROUND UTAMA FULL LAYAR (ATAS SAMPAI BAWAH) */
         body {
             font-family: sans-serif;
             background: #141414;
             color: white;
             margin: 0;
             padding: 0;
+            position: relative;
+            min-height: 100vh;
         }
 
-        /* 2. HERO SECTION DENGAN EFEK BLUR SINEMATIK */
+        /* Trik Supaya Gambar Menyelimuti Seluruh Halaman dan Nge-blur Tanpa Merusak Tulisan */
+        body::before {
+            content: "";
+            position: fixed; /* Mengunci background agar tidak ikut bergerak saat di-scroll */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* ⚠️ GAMBAR KAMU SEKARANG SUDAH FULL DARI ATAS SAMPAI BAWAH */
+            background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
+            background-size: cover;
+            filter: blur(8px) brightness(0.25); /* Efek blur + remang gelap biar teks terbaca jelas */
+            transform: scale(1.02);
+            z-index: -2; /* Di paling belakang kodingan */
+        }
+
+        /* Lapisan Kegelapan Ekstra untuk Area Content */
+        .page-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(20,20,20,0.4) 0%, rgba(20,20,20,0.85) 50%, #141414 100%);
+            z-index: -1;
+        }
+
+        /* 2. HERO SECTION (BAGIAN ATAS) */
         .hero-section {
-            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            min-height: 75vh;
+            min-height: 70vh;
             padding: 40px 20px;
             box-sizing: border-box;
-            overflow: hidden;
         }
 
-        /* Wadah Khusus Background */
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* 🛠️ SUDAH DI-FIX: Mengubah posisi background menjadi 'center top' agar bagian atas gambar kelihatan utuh */
-            background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
-            background-size: cover;
-            filter: blur(8px) brightness(0.4); 
-            transform: scale(1.05); 
-            z-index: 1;
-        }
-
-        /* Lapisan Gradasi Gelap Tambahan (Overlay) */
-        .hero-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(20,20,20,0.2) 0%, #141414 100%);
-            z-index: 2;
-        }
-
-        /* Konten Tulisan */
         .hero-content {
-            position: relative;
-            z-index: 3;
             max-width: 650px;
         }
 
@@ -96,7 +94,7 @@
             transform: scale(0.96);
         }
 
-        /* 3. FITUR UNGGULAN SECTION */
+        /* 3. FITUR UNGGULAN SECTION (SEKARANG PUNYA BG TRANSPARAN BIAR TEMBUS PANDANG) */
         .features-section {
             padding: 60px 20px;
             max-width: 1000px;
@@ -118,10 +116,11 @@
         }
 
         .feature-card {
-            background: #222;
+            background: rgba(34, 34, 34, 0.65); /* Transparan dikit biar tembus pandang ke background film */
+            backdrop-filter: blur(5px);
             padding: 25px;
             border-radius: 10px;
-            border: 1px solid #333;
+            border: 1px solid #444;
             transition: 0.3s;
         }
 
@@ -136,7 +135,7 @@
         }
 
         .feature-card p {
-            color: #aaa;
+            color: #ccc;
             font-size: 14px;
             line-height: 1.5;
             margin: 10px 0 0 0;
@@ -145,7 +144,8 @@
         /* 4. PRICING SECTION (DAFTAR HARGA PAKET) */
         .pricing-section {
             padding: 60px 20px;
-            background: #0a0a0a;
+            background: rgba(10, 10, 10, 0.7); /* Transparan */
+            backdrop-filter: blur(5px);
             text-align: center;
         }
 
@@ -170,7 +170,7 @@
         }
 
         .price-card {
-            background: #1c1c1c;
+            background: rgba(28, 28, 28, 0.85);
             border: 1px solid #333;
             border-radius: 12px;
             padding: 30px 20px;
@@ -184,7 +184,7 @@
         .price-card.popular {
             border-color: #e50914;
             transform: scale(1.03);
-            background: #221414;
+            background: rgba(34, 20, 20, 0.9);
         }
 
         .badge {
@@ -260,19 +260,20 @@
         footer {
             padding: 40px 20px;
             text-align: center;
-            color: #555;
+            color: #666;
             font-size: 13px;
             background: #141414;
             border-top: 1px solid #222;
+            position: relative;
+            z-index: 2;
         }
     </style>
 </head>
 <body>
 
+    <div class="page-overlay"></div>
+
     <div class="hero-section">
-        <div class="hero-bg"></div>
-        <div class="hero-overlay"></div>
-        
         <div class="hero-content">
             <h1>STREAMINGKU</h1>
             <p>Saksikan ratusan koleksi video premium kualitas super jernih tanpa gangguan jeda iklan. Daftar sekarang dan mulai maraton menonton!</p>
