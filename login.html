@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Streaming Premium</title>
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Masuk Akun</h2>
+        <p>Silakan masuk untuk melanjutkan menonton</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Masukkan username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Masukkan password">
+            </div>
+            
+            <button type="submit">Masuk</button>
+        </form>
+        
+        <p>Belum punya akun? <a href="register.html">Daftar di sini</a></p>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    
+                    // Simpan data login user ke Session Storage browser agar tidak hilang saat pindah halaman
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('username', data.user.username);
+                    sessionStorage.setItem('subUntil', data.user.subscription_until || 'expired');
+
+                    // Lempar user ke halaman utama streaming (dashboard.html)
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('Gagal: ' + data.error);
+                }
+            } catch (error) {
+                alert('Terjadi kesalahan jaringan.');
+            }
+        });
+    </script>
+</body>
+</html>
