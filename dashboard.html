@@ -232,7 +232,7 @@
 
     <script>
         const LIBRARY_ID = "680881"; 
-        const WA_ADMIN = "6283138319827"; // ⚠️ GANTI JADI NOMOR WA KAMU (Wajib awali dengan 62)
+        const WA_ADMIN = "6283138319827"; // Kode negara 62 aman
         let metodeTerpilih = "qris";
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
@@ -253,7 +253,7 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                if (tanggalMasaAktif > sekarang) {
+                if (tanggalMasaAktif > sewage) {
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     loadBunnyVideos();
@@ -272,7 +272,6 @@
             document.getElementById('tampilHarga').innerText = "Rp " + hargaFinalGlobal.toLocaleString('id-ID');
             updateLinkWhatsApp();
             
-            // Set default tab balik ke QRIS setiap kali buka baru
             gantiMetode('qris');
             document.getElementById('modalBayar').style.display = 'flex';
         }
@@ -319,11 +318,23 @@
             document.getElementById('modalBayar').style.display = 'none';
         }
 
-        // ================= LOADING VIDEO BUNNY NET =================
+        // ================= LOADING VIDEO BUNNY NET + ANTI-SHARING PENGUNCI =================
         async function loadBunnyVideos() {
             try {
-                const response = await fetch('/api/get-videos');
+                // 🔥 ANTI-SHARING: Ambil token sesi aktif perangkat dari browser
+                const token = sessionStorage.getItem('sessionToken'); 
+                
+                // Kirim data username & token ke API verifikasi D1 backend
+                const response = await fetch(`/api/get-videos?user=${username}&token=${token}`);
                 const videos = await response.json();
+                
+                // 🔥 KICK USER JIKA TOKEN DATABASE BERBEDA (LOGIN DI TEMPAT LAIN)
+                if (videos.error === "KICK_USER") {
+                    alert(videos.message);
+                    logout();
+                    return;
+                }
+
                 const container = document.getElementById('videoList');
                 container.innerHTML = ''; 
                 
