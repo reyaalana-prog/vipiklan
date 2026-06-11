@@ -24,6 +24,7 @@
             left: 0;
             width: 100%;
             height: 100%;
+            /* Tautan gambar kolase premium milik Arlyn */
             background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
             background-size: cover;
             filter: blur(3px) brightness(0.3); 
@@ -267,10 +268,16 @@
             z-index: 2;
         }
 
-        /* 🛠️ TAMBAHAN BARU: CSS KHUSUS TAMPILAN HP (MOBILE RESPONSIVE) */
+        /* 🛠️ CSS KHUSUS TAMPILAN HP (MOBILE RESPONSIVE) */
         @media (max-width: 480px) {
+            /* 🔥 OPTIMASI BACKGROUND DI HP: Mengubah ukuran agar pas di layar portrait tanpa nge-stretch parah */
+            body::before {
+                background-position: center center;
+                background-size: auto 100vh; /* Mengunci tinggi gambar sesuai layar HP, membiarkan lebarnya proporsional */
+            }
+
             .hero-section h1 {
-                font-size: 36px; /* Perkecil judul di HP agar tidak meluber */
+                font-size: 36px; 
             }
             .hero-section p {
                 font-size: 15px;
@@ -279,23 +286,23 @@
             .btn-main {
                 padding: 14px 28px;
                 font-size: 16px;
-                width: 90%; /* Tombol menyesuaikan lebar HP */
+                width: 90%; 
                 box-sizing: border-box;
             }
             .features-section h2, .pricing-section h2 {
                 font-size: 22px;
             }
             .pricing-grid {
-                flex-direction: column; /* Kartu paket berjejer ke bawah murni */
+                flex-direction: column; 
                 align-items: center;
                 gap: 25px;
             }
             .price-card {
-                max-width: 100%; /* Kartu paket melebar penuh sesuai layar HP */
+                max-width: 100%; 
                 width: 90%;
             }
             .price-card.popular {
-                transform: scale(1); /* Matikan scale di HP biar tidak menabrak kartu lain */
+                transform: scale(1); 
             }
         }
     </style>
