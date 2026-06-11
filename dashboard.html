@@ -253,7 +253,6 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                // 🛠️ SUDAH DI-FIX: Mengubah 'sewage' menjadi variabel 'sekarang' yang valid
                 if (tanggalMasaAktif > sekarang) {
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
@@ -347,9 +346,10 @@
 
                     const card = document.createElement('div');
                     card.className = 'video-card';
+                    
+                    // 🛠️ FIX UTAMA: Perintah scroll otomatis sudah dihapus bersih
                     card.onclick = () => {
                         playVideo(video.guid);
-                        window.scrollTo({top: 0, behavior: 'smooth'});
                     };
                     
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
@@ -373,6 +373,7 @@
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
         }
 
+        /* ⚠️ SUNTIKAN IMPLEMENTASI RULE 1 SI: Bersihkan menu penutup/Numbered Options di akhir */
         function logout() {
             sessionStorage.clear();
             window.location.href = '/login';
