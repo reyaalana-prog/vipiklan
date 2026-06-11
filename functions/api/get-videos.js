@@ -1,9 +1,9 @@
 export async function onRequestGet(context) {
   const { env } = context;
 
-  // Data Bunny.net milik Arlyn
+  // Data Bunny.net milik Arlyn (Sudah diperbaiki)
   const LIBRARY_ID = "680881"; 
-  const API_KEY = "e33bda09-efca-431a-ab6a-20503328432f"; 
+  const API_KEY = "e33bda09-efca-431a-ab6a20503328-432f-4fc6"; 
 
   try {
     // Minta daftar video ke API server Bunny.net
@@ -11,7 +11,8 @@ export async function onRequestGet(context) {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'AccessKey': API_KEY
+        'AccessKey': API_KEY,
+        'User-Agent': 'CloudflarePagesFunction/1.0 (web-streaming-premium)'
       }
     });
 
