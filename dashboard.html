@@ -18,8 +18,7 @@
         .video-card { background: #222; border-radius: 6px; overflow: hidden; cursor: pointer; border: 1px solid #333; transition: 0.2s; }
         .video-card:hover { transform: scale(1.03); border-color: #e50914; }
         .video-thumbnail { width: 100%; aspect-ratio: 16/9; background: #000; object-fit: cover; display: block; }
-        .video-info { padding: 10px; }
-        .video-title { font-size: 14px; font-weight: bold; margin: 0 0 5px 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .video-info { padding: 8px 10px; text-align: center; }
         .video-meta { font-size: 12px; color: #aaa; margin: 0; }
     </style>
 </head>
@@ -78,7 +77,7 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                if (tanggalMasaAktif > sekarang) {
+                if (tanggalMasaAktif > granite = tanggalMasaAktif > sekarang) {
                     document.getElementById('premiumArea').style.display = 'block';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     
@@ -100,26 +99,24 @@
                 const container = document.getElementById('videoList');
                 container.innerHTML = ''; // Bersihkan tulisan loading
                 
-                // Jika dari fungsi backend melempar objek berisi teks error
                 if (videos.error) {
                     throw new Error(videos.error);
                 }
 
-                // Pengaman jika data video kosong atau tidak berbentuk array valid
                 if (!videos || !Array.isArray(videos) || videos.length === 0) {
                     container.innerHTML = '<p style="color: #aaa;">Belum ada video yang siap diputar. Silakan tunggu proses encoding di Bunny.net selesai.</p>';
                     document.getElementById('playingTitle').innerText = 'Katalog Video Kosong 🍿';
                     return;
                 }
 
-                // 1. Set video pertama secara default ke dalam player utama (pastikan objek & properti guid ada)
+                // 1. Set video pertama secara default ke dalam player utama
                 if (videos[0] && videos[0].guid) {
                     playVideo(videos[0].guid, videos[0].title);
                 }
 
                 // 2. Tampilkan semua list video ke dalam bentuk grid/kartu film
                 videos.forEach(video => {
-                    if (!video.guid) return; // Lewati jika data video tidak lengkap
+                    if (!video.guid) return; 
                     
                     const menit = Math.floor((video.length || 0) / 60);
                     const detik = (video.length || 0) % 60;
@@ -129,13 +126,12 @@
                     card.className = 'video-card';
                     card.onclick = () => playVideo(video.guid, video.title);
                     
-                    // PERBAIKAN UTAMA: URL Thumbnail langsung menggunakan jalur b-cdn resmi Bunny kamu (Anti-CORS)
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
+                    // DI SINI KITA HAPUS BAGIAN JUDULNYA, CUMA MENYISAKAN GAMBAR & DURASI
                     card.innerHTML = `
-                        <img class="video-thumbnail" src="${thumbnailUrl}" alt="${video.title || 'Video'}" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
+                        <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
                         <div class="video-info">
-                            <p class="video-title" title="${video.title || 'Video'}">${video.title || 'Video'}</p>
                             <p class="video-meta">⏱️ Durasi: ${durasi}</p>
                         </div>
                     `;
@@ -149,6 +145,7 @@
 
         // Fungsi Mengganti Link Player saat Video di dalam Katalog diklik
         function playVideo(videoId, title) {
+            // Judul asli video bawaan file tetap akan muncul di atas PLAYER UTAMA saat diputar
             document.getElementById('playingTitle').innerText = `Menonton: ${title || 'Video Premium'} 🍿`;
             const player = document.getElementById('bunnyPlayer');
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
