@@ -24,10 +24,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* ⚠️ GAMBAR KAMU SEKARANG SUDAH FULL DARI ATAS SAMPAI BAWAH */
+            /* ✅ TAUTAN GAMBAR BARU UTK BACKGROUND FULL DARI ATAS SAMPAI BAWAH */
             background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
             background-size: cover;
-            filter: blur(8px) brightness(0.25); /* Efek blur + remang gelap biar teks terbaca jelas */
+            /* 🛠️ TINGKAT BLUR DIKURANGI AGAR GAMBAR LEBIH JELAS & TIDAK TERPOTONG */
+            filter: blur(3px) brightness(0.3); 
             transform: scale(1.02);
             z-index: -2; /* Di paling belakang kodingan */
         }
@@ -39,7 +40,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(20,20,20,0.4) 0%, rgba(20,20,20,0.85) 50%, #141414 100%);
+            background: linear-gradient(to bottom, rgba(20,20,20,0.3) 0%, rgba(20,20,20,0.8) 50%, #141414 100%);
             z-index: -1;
         }
 
@@ -94,7 +95,7 @@
             transform: scale(0.96);
         }
 
-        /* 3. FITUR UNGGULAN SECTION (SEKARANG PUNYA BG TRANSPARAN BIAR TEMBUS PANDANG) */
+        /* 3. FITUR UNGGULAN SECTION (DENGAN BG TRANSPARAN) */
         .features-section {
             padding: 60px 20px;
             max-width: 1000px;
@@ -116,7 +117,7 @@
         }
 
         .feature-card {
-            background: rgba(34, 34, 34, 0.65); /* Transparan dikit biar tembus pandang ke background film */
+            background: rgba(34, 34, 34, 0.65); 
             backdrop-filter: blur(5px);
             padding: 25px;
             border-radius: 10px;
@@ -144,7 +145,7 @@
         /* 4. PRICING SECTION (DAFTAR HARGA PAKET) */
         .pricing-section {
             padding: 60px 20px;
-            background: rgba(10, 10, 10, 0.7); /* Transparan */
+            background: rgba(10, 10, 10, 0.7); 
             backdrop-filter: blur(5px);
             text-align: center;
         }
