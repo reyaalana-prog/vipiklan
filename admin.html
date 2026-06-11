@@ -9,15 +9,17 @@
         .container { max-width: 800px; margin: 0 auto; }
         h1 { border-bottom: 2px solid #e50914; padding-bottom: 10px; font-size: 24px; color: #e50914; }
         
-        /* Area Login PIN */
         .pin-box { background: #222; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-top: 50px; text-align: center; }
-        input[type="password"], input[type="text"] { background: #333; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-size: 16px; width: 80%; max-width: 300px; margin-bottom: 10px; text-align: center; }
+        input[type="password"] { background: #333; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-size: 16px; width: 80%; max-width: 300px; margin-bottom: 10px; text-align: center; }
         
-        /* Tabel & List Data */
-        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
-        .card-stat { background: #222; padding: 15px; border-radius: 6px; flex: 1; text-align: center; border: 1px solid #333; }
-        .card-stat h3 { margin: 0; font-size: 14px; color: #aaa; }
-        .card-stat p { margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: #2ecc71; }
+        /* TAMPILAN KOTAK STATISTIK */
+        .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .card-stat { background: #222; padding: 15px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border: 1px solid #333; }
+        .card-stat h3 { margin: 0; font-size: 12px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .card-stat p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; }
+        .stat-blue { color: #3498db; }
+        .stat-green { color: #2ecc71; }
+        .stat-gold { color: #f1c40f; }
         
         .user-table-wrapper { overflow-x: auto; background: #222; border-radius: 8px; border: 1px solid #333; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
@@ -37,8 +39,7 @@
         
         <div id="pinArea" class="pin-box">
             <h3>🔒 Masukkan PIN Kunci Akses Admin</h3>
-            <p style="color: #aaa; font-size: 12px; margin-bottom: 15px;">Halaman ini dilindungi enkripsi server rahasia.</p>
-            <input type="password" id="adminPinInput" placeholder="Masukkan 6 Digit PIN"><br>
+            <input type="password" id="adminPinInput" placeholder="Masukkan PIN"><br>
             <button class="btn" onclick="verifikasiPin()">Buka Akses Admin</button>
         </div>
 
@@ -50,12 +51,20 @@
             
             <div class="stats">
                 <div class="card-stat">
-                    <h3>Total Pelanggan Terdaftar</h3>
-                    <p id="totalUsers">0</p>
+                    <h3>Total Pengguna</h3>
+                    <p id="totalUsers" class="stat-blue">0</p>
+                </div>
+                <div class="card-stat">
+                    <h3>User Aktif (Premium)</h3>
+                    <p id="activeUsers" class="stat-green">0</p>
+                </div>
+                <div class="card-stat">
+                    <h3>Estimasi Penghasilan</h3>
+                    <p id="totalIncome" class="stat-gold">Rp 0</p>
                 </div>
             </div>
 
-            <h3 style="text-align: left; margin-top: 30px;">Daftar Pengguna Website</h3>
+            <h3 style="text-align: left;">Manajemen Hak Akses</h3>
             <div class="user-table-wrapper">
                 <table>
                     <thead>
@@ -68,7 +77,7 @@
                     </thead>
                     <tbody id="userTableBody">
                         <tr>
-                            <td colspan="4" style="text-align: center; color: #aaa;">Memuat data user...</td>
+                            <td colspan="4" style="text-align: center; color: #aaa;">Memuat data...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -79,35 +88,27 @@
 
     <script>
         let SEED_PIN = localStorage.getItem('admin_session_pin') || '';
+        const HARGA_PER_BULAN = 29000; // Kamu bisa ubah harga paket bulanan di sini
 
-        // Otomatis cek session pin saat halaman dimuat
-        if (SEED_PIN) {
-            tampilkanDashboardAdmin();
-        }
+        if (SEED_PIN) tampilkanDashboardAdmin();
 
         function verifikasiPin() {
-            const input = document.getElementById('adminPinInput').value;
-            if (!input) return alert('PIN tidak boleh kosong!');
-            
-            SEED_PIN = input;
+            SEED_PIN = document.getElementById('adminPinInput').value;
+            if (!SEED_PIN) return alert('PIN tidak boleh kosong!');
             tampilkanDashboardAdmin();
         }
 
         async function tampilkanDashboardAdmin() {
             try {
                 const response = await fetch(`/api/admin-manage?pin=${SEED_PIN}`);
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'PIN Salah!');
-                }
+                if (!response.ok) throw new Error('PIN Akses Salah!');
                 
-                // Jika PIN lolos validasi, simpan ke memori browser agar tidak mengetik ulang saat refresh
                 localStorage.setItem('admin_session_pin', SEED_PIN);
                 document.getElementById('pinArea').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
                 
-                const users = await response.json();
-                renderUserTable(users);
+                const data = await response.json();
+                renderDashboard(data.users, data.serverTime);
 
             } catch (error) {
                 alert(error.message);
@@ -115,17 +116,21 @@
             }
         }
 
-        function renderUserTable(users) {
-            document.getElementById('totalUsers').innerText = users.length;
+        function renderDashboard(users, serverTime) {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
 
-            if (users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada user mendaftar.</td></tr>';
+            let totalPendaftar = users.length;
+            let userAktifSkarang = 0;
+
+            document.getElementById('totalUsers').innerText = totalPendaftar;
+
+            if (totalPendaftar === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada data user.</td></tr>';
+                document.getElementById('activeUsers').innerText = "0";
+                document.getElementById('totalIncome').innerText = "Rp 0";
                 return;
             }
-
-            const sekarang = new Date().getTime();
 
             users.forEach(user => {
                 const formatTanggalDb = user.subUntil ? user.subUntil.replace(" ", "T") : '';
@@ -134,9 +139,11 @@
                 let statusText = "EXPIRED";
                 let badgeClass = "status-expired";
 
-                if (tanggalMasaAktif > sekarang) {
+                // Deteksi otomatis jika waktu expired masih di masa depan
+                if (tanggalMasaAktif > serverTime) {
                     statusText = "PREMIUM";
                     badgeClass = "status-active";
+                    userAktifSkarang++; // Tambahkan hitungan user aktif
                 }
 
                 const tampilTanggal = user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set';
@@ -153,47 +160,40 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Pasang angka user aktif ke kotak statistik
+            document.getElementById('activeUsers').innerText = userAktifSkarang;
+            
+            // Hitung estimasi omset: Jumlah user yang aktif dikali harga langgganan
+            let estimasiOmset = userAktifSkarang * HARGA_PER_BULAN;
+            document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
         }
 
         async function perpanjangUser(username, jumlahHari) {
             let targetTanggalStr = "expired";
-            
             if (jumlahHari > 0) {
                 const tgl = new Date();
                 tgl.setDate(tgl.getDate() + jumlahHari);
-                
-                // Format ke standar ISO YYYY-MM-DD HH:MM:SS untuk Supabase
                 const yyyy = tgl.getFullYear();
                 const mm = String(tgl.getMonth() + 1).padStart(2, '0');
                 const dd = String(tgl.getDate()).padStart(2, '0');
                 targetTanggalStr = `${yyyy}-${mm}-${dd} 23:59:59`;
             }
 
-            const konfirmasi = confirm(`Apakah kamu yakin ingin mengubah masa aktif untuk user [ ${username} ]?`);
-            if (!konfirmasi) return;
+            if (!confirm(`Ubah masa aktif user [ ${username} ]?`)) return;
 
             try {
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Admin-PIN': SEED_PIN
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        new_sub_until: targetTanggalStr
-                    })
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
+                    body: JSON.stringify({ username, new_sub_until: targetTanggalStr })
                 });
 
-                const resData = await response.json();
-                if (!response.ok) throw new Error(resData.error);
-
-                alert(resData.message);
-                // Muat ulang data tabel otomatis setelah sukses update
+                if (!response.ok) throw new Error('Gagal memperbarui database.');
+                alert('Berhasil diupdate!');
                 tampilkanDashboardAdmin();
-
             } catch (error) {
-                alert('Gagal memperbarui: ' + error.message);
+                alert(error.message);
             }
         }
 
