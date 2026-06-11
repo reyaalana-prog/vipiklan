@@ -38,7 +38,6 @@
             background: #000;
             width: 100%;
             z-index: 100;
-            /* Di HP, bagian ini akan menempel di atas */
             position: sticky;
             top: 0;
             border-bottom: 2px solid #e50914; /* Garis merah Netflix style */
@@ -109,18 +108,51 @@
         .video-info { padding: 8px; text-align: center; }
         .video-meta { font-size: 11px; color: #aaa; margin: 0; }
 
-        .alert-expired { color: #ff4d4d; background: #2a1b1b; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; }
+        /* AREA EXPIRED & TOMBOL PILIHAN PAKET */
+        .alert-expired { color: #ff4d4d; background: #2a1b1b; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; text-align: center; }
+        .package-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn-pkg { background: #e50914; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; }
+        .btn-pkg:active { transform: scale(0.98); }
+        .btn-pkg span { font-size: 13px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; }
+
+        /* 🎨 GAYA MODAL POP-UP KASIR MULTI-METODE */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #fff; color: #000; width: 100%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center; position: relative; animation: fadeIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 26px; cursor: pointer; color: #888; font-weight: bold; }
+        
+        /* Navigasi Pilihan Metode (Tabs) */
+        .payment-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin: 15px 0 10px 0; }
+        .tab-btn { flex: 1; border: none; background: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; transition: 0.2s; color: #555; }
+        .tab-btn.active { background: #e50914; color: #fff; }
+
+        /* Konten Metode */
+        .method-content { display: none; }
+        .method-content.active { display: block; }
+
+        .qris-img { width: 100%; max-width: 220px; margin: 5px 0; border: 1px solid #ddd; border-radius: 10px; display: inline-block; }
+        
+        /* Box Akun DANA */
+        .dana-account-box { background: #f0f7ff; border: 1px solid #3498db; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left; }
+        .dana-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        .dana-number { font-size: 18px; font-family: monospace; font-weight: bold; color: #2980b9; }
+        .btn-copy { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: bold; }
+        .btn-copy:active { background: #2980b9; }
+
+        .price-box { background: #f8f9fa; border: 2px dashed #e50914; padding: 12px; border-radius: 10px; margin: 12px 0; }
+        .price-box h1 { margin: 0; color: #e50914; font-size: 26px; font-family: monospace; }
+        .btn-wa { background: #25d366; color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; text-decoration: none; display: block; box-sizing: border-box; box-shadow: 0 4px 10px rgba(37,211,102,0.3); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <header>
-        <h2>Halo, <span id="userDisplay">...</span>!</h2>
+        <h2>Halo, <span id="userDisplay">...</span>! 👋</h2>
         <button class="btn-logout" onclick="logout()">Keluar</button>
     </header>
 
-    <div id="premiumArea" style="display: none; display: flex; flex-direction: column; flex: 1;">
-        
+    <div id="premiumArea" style="display: none; flex-direction: column; flex: 1;">
         <div class="sticky-player-section">
             <div class="video-container">
                 <iframe id="bunnyPlayer" src="" 
@@ -136,26 +168,75 @@
             <p style="font-size: 12px; color: #2ecc71; margin-bottom: 15px;">
                 ✅ Premium Aktif sampai: <span id="dateDisplay"></span>
             </p>
-
             <h3 class="playlist-title">Koleksi Video Premium</h3>
-            
             <div id="videoList" class="video-grid">
                 <p style="color: #aaa;">Sedang mengambil daftar video...</p>
             </div>
         </div>
-
     </div>
 
-    <div id="expiredArea" style="display: none; padding: 20px;" class="scrollable-content">
+    <div id="expiredArea" style="display: none;" class="scrollable-content">
         <div class="alert-expired">
             <h3>🔒 Akses Terkunci!</h3>
-            <p>Masa aktif kamu sudah kedaluwarsa. Silakan hubungi admin.</p>
-            <button style="background:#e50914; color:white; border:none; padding:10px; border-radius:4px; font-weight:bold;">Perpanjang Paket</button>
+            <p>Masa aktif kamu sudah kedaluwarsa. Silakan pilih paket di bawah untuk memperpanjang paket premium:</p>
+            
+            <div class="package-options">
+                <button class="btn-pkg" onclick="bukaBayar(3, 5000)">
+                    🚀 Paket Hemat (3 Hari) <span>Rp 5.000</span>
+                </button>
+                <button class="btn-pkg" onclick="bukaBayar(10, 15000)">
+                    🔥 Paket Populer (10 Hari) <span>Rp 15.000</span>
+                </button>
+                <button class="btn-pkg" onclick="bukaBayar(30, 30000)">
+                    👑 Paket Sultan (30 Hari) <span>Rp 30.000</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalBayar" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="tutupBayar()">&times;</span>
+            <h3 style="margin: 0; font-size: 18px;">Pilih Metode Bayar</h3>
+            
+            <div class="payment-tabs">
+                <button id="tabQris" class="tab-btn active" onclick="gantiMetode('qris')">📱 Scan QRIS</button>
+                <button id="tabDana" class="tab-btn" onclick="gantiMetode('dana')">💙 Kirim DANA</button>
+            </div>
+            
+            <div id="kontenQris" class="method-content active">
+                <p style="font-size: 12px; color: #666; margin: 5px 0;">Scan QRIS di bawah menggunakan Dana, OVO, GoPay, atau LinkAja</p>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=CONTOH_QRIS_ARLYN" class="qris-img" alt="QRIS Merchant">
+            </div>
+
+            <div id="kontenDana" class="method-content">
+                <p style="font-size: 12px; color: #666; margin: 5px 0;">Silakan transfer langsung sesama aplikasi DANA ke akun Admin:</p>
+                <div class="dana-account-box">
+                    <span style="font-size: 11px; color: #7f8c8d; font-weight: bold;">NOMOR AKUN DANA (A.N ARLYN):</span>
+                    <div class="dana-row">
+                        <span id="danaNumberText" class="dana-number">081234567890</span> <button class="btn-copy" onclick="salinNomorDana()">Salin</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="price-box">
+                <p style="font-size: 12px; margin: 0 0 5px 0; color: #555; font-weight: bold;">INFO TOTAL TRANSFER:</p>
+                <h1 id="tampilHarga">Rp 0</h1>
+                <p style="font-size: 10px; color: #e67e22; margin: 5px 0 0 0; font-weight: bold;">*Wajib transfer tepat sampai digit terakhir agar cepat dicek admin</p>
+            </div>
+
+            <p style="font-size: 11px; line-height: 1.4; color: #444; margin-top: 10px;">Jika transfer berhasil, klik tombol hijau di bawah ini untuk mengirimkan konfirmasi & bukti otomatis ke WhatsApp Admin.</p>
+            <a id="btnWA" href="#" target="_blank" class="btn-wa">SAYA SUDAH TRANSFER</a>
         </div>
     </div>
 
     <script>
         const LIBRARY_ID = "680881"; 
+        const WA_ADMIN = "6281234567890"; // ⚠️ GANTI JADI NOMOR WA KAMU (Wajib awali dengan 62)
+        let metodeTerpilih = "qris";
+        let detailHariGlobal = 0;
+        let hargaFinalGlobal = 0;
+
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const username = sessionStorage.getItem('username');
         const subUntil = sessionStorage.getItem('subUntil');
@@ -164,7 +245,6 @@
             window.location.href = '/login';
         } else {
             document.getElementById('userDisplay').innerText = username;
-            
             const sekarang = new Date().getTime();
             
             if (!subUntil || subUntil === 'expired' || subUntil === 'null') {
@@ -183,6 +263,63 @@
             }
         }
 
+        // ================= LOGIKA INTERAKSI POP-UP KASIR =================
+        function bukaBayar(hari, hargaBase) {
+            const kodeUnik = Math.floor(100 + Math.random() * 899);
+            hargaFinalGlobal = hargaBase + kodeUnik;
+            detailHariGlobal = hari;
+
+            document.getElementById('tampilHarga').innerText = "Rp " + hargaFinalGlobal.toLocaleString('id-ID');
+            updateLinkWhatsApp();
+            
+            // Set default tab balik ke QRIS setiap kali buka baru
+            gantiMetode('qris');
+            document.getElementById('modalBayar').style.display = 'flex';
+        }
+
+        function gantiMetode(metode) {
+            metodeTerpilih = metode;
+            
+            const tabQris = document.getElementById('tabQris');
+            const tabDana = document.getElementById('tabDana');
+            const kontenQris = document.getElementById('kontenQris');
+            const kontenDana = document.getElementById('kontenDana');
+
+            if (metode === 'qris') {
+                tabQris.classList.add('active');
+                tabDana.classList.remove('active');
+                kontenQris.classList.add('active');
+                kontenDana.classList.remove('active');
+            } else {
+                tabDana.classList.add('active');
+                tabQris.classList.remove('active');
+                kontenDana.classList.add('active');
+                kontenQris.classList.remove('active');
+            }
+            updateLinkWhatsApp();
+        }
+
+        function updateLinkWhatsApp() {
+            const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
+            const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${detailHariGlobal} Hari sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
+            
+            document.getElementById('btnWA').href = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
+        }
+
+        function salinNomorDana() {
+            const nomorDana = document.getElementById('danaNumberText').innerText;
+            navigator.clipboard.writeText(nomorDana).then(() => {
+                alert('Nomor DANA berhasil disalin: ' + nomorDana);
+            }).catch(err => {
+                alert('Gagal menyalin nomor, silakan salin manual.');
+            });
+        }
+
+        function tutupBayar() {
+            document.getElementById('modalBayar').style.display = 'none';
+        }
+
+        // ================= LOADING VIDEO BUNNY NET =================
         async function loadBunnyVideos() {
             try {
                 const response = await fetch('/api/get-videos');
@@ -191,10 +328,7 @@
                 container.innerHTML = ''; 
                 
                 if (videos.error) throw new Error(videos.error);
-
-                if (videos[0] && videos[0].guid) {
-                    playVideo(videos[0].guid);
-                }
+                if (videos[0] && videos[0].guid) playVideo(videos[0].guid);
 
                 videos.forEach(video => {
                     if (!video.guid) return; 
@@ -206,7 +340,6 @@
                     card.className = 'video-card';
                     card.onclick = () => {
                         playVideo(video.guid);
-                        // Optional: Otomatis scroll ke atas sedikit jika di HP saat klik
                         window.scrollTo({top: 0, behavior: 'smooth'});
                     };
                     
@@ -220,7 +353,6 @@
                     `;
                     container.appendChild(card);
                 });
-
             } catch (error) {
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
             }
