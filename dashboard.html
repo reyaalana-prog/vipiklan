@@ -232,7 +232,7 @@
 
     <script>
         const LIBRARY_ID = "680881"; 
-        const WA_ADMIN = "6283138319827"; // Kode negara 62 aman
+        const WA_ADMIN = "6283138319827"; 
         let metodeTerpilih = "qris";
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
@@ -253,7 +253,8 @@
                 const formatTanggalDb = subUntil.replace(" ", "T");
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
-                if (tanggalMasaAktif > sewage) {
+                // 🛠️ SUDAH DI-FIX: Mengubah 'sewage' menjadi variabel 'sekarang' yang valid
+                if (tanggalMasaAktif > sekarang) {
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     loadBunnyVideos();
@@ -321,14 +322,11 @@
         // ================= LOADING VIDEO BUNNY NET + ANTI-SHARING PENGUNCI =================
         async function loadBunnyVideos() {
             try {
-                // 🔥 ANTI-SHARING: Ambil token sesi aktif perangkat dari browser
                 const token = sessionStorage.getItem('sessionToken'); 
                 
-                // Kirim data username & token ke API verifikasi D1 backend
                 const response = await fetch(`/api/get-videos?user=${username}&token=${token}`);
                 const videos = await response.json();
                 
-                // 🔥 KICK USER JIKA TOKEN DATABASE BERBEDA (LOGIN DI TEMPAT LAIN)
                 if (videos.error === "KICK_USER") {
                     alert(videos.message);
                     logout();
