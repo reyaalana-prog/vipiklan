@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STREAMINGKU - Platform Video Premium Tanpa Iklan</title>
+    <style>
+        /* 1. SETUP DASAR & BACKDROP */
+        body {
+            font-family: sans-serif;
+            background: #141414;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 2. HERO SECTION (BAGIAN ATAS) */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 70vh;
+            padding: 40px 20px;
+            background: linear-gradient(rgba(20,20,20,0.6), #141414), url('https://via.placeholder.com/1200x600/000/333?text=STREAMINGKU+PREMIUM');
+            background-size: cover;
+            background-position: center;
+            box-sizing: border-box;
+        }
+
+        .hero-section h1 {
+            color: #e50914; /* Merah Netflix Style */
+            font-size: 48px;
+            margin: 0 0 15px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.7);
+        }
+
+        .hero-section p {
+            font-size: 18px;
+            color: #eee;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .btn-main {
+            text-decoration: none;
+            background: #e50914;
+            color: white;
+            padding: 16px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 6px 15px rgba(229,9,20,0.4);
+            transition: 0.2s;
+            display: inline-block;
+        }
+
+        .btn-main:active {
+            transform: scale(0.96);
+        }
+
+        /* 3. FITUR UNGGULAN SECTION */
+        .features-section {
+            padding: 60px 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .features-section h2 {
+            font-size: 28px;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .feature-card {
+            background: #222;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: #e50914;
+        }
+
+        .feature-card h3 {
+            color: #e50914;
+            margin-top: 0;
+            font-size: 20px;
+        }
+
+        .feature-card p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 10px 0 0 0;
+        }
+
+        /* 4. PRICING SECTION (DAFTAR HARGA PAKET) */
+        .pricing-section {
+            padding: 60px 20px;
+            background: #0a0a0a;
+            text-align: center;
+        }
+
+        .pricing-section h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .pricing-section .sub {
+            color: #aaa;
+            margin-bottom: 40px;
+            font-size: 15px;
+        }
+
+        .pricing-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .price-card {
+            background: #1c1c1c;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 260px;
+            box-sizing: border-box;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .price-card.popular {
+            border-color: #e50914;
+            transform: scale(1.03);
+            background: #221414;
+        }
+
+        .badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e50914;
+            color: white;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .price-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+
+        .price-amount {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            margin: 15px 0;
+        }
+
+        .price-amount span {
+            font-size: 14px;
+            color: #aaa;
+            font-weight: normal;
+        }
+
+        .price-features {
+            list-style: none;
+            padding: 0;
+            margin: 25px 0;
+            text-align: left;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .price-features li {
+            margin-bottom: 10px;
+        }
+
+        .price-features li::before {
+            content: "✅ ";
+        }
+
+        .btn-select {
+            display: block;
+            text-decoration: none;
+            background: #333;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .price-card.popular .btn-select {
+            background: #e50914;
+        }
+
+        .btn-select:hover {
+            opacity: 0.9;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 40px 20px;
+            text-align: center;
+            color: #555;
+            font-size: 13px;
+            background: #141414;
+            border-top: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero-section">
+        <h1>STREAMINGKU</h1>
+        <p>Saksikan ratusan koleksi video premium kualitas super jernih tanpa gangguan jeda iklan. Daftar sekarang dan mulai maraton menonton!</p>
+        <a href="/register" class="btn-main">MULAI NONTON SEKARANG</a>
+    </div>
+
+    <div class="features-section">
+        <h2>Kenapa Harus Nonton Di STREAMINGKU?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>🚫 Tanpa Iklan</h3>
+                <p>Nonton sepuasnya tanpa gangguan iklan pop-up atau video komersial di tengah jalan.</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Server Super Cepat</h3>
+                <p>Streaming anti-buffering menggunakan infrastruktur premium cloud berkecepatan tinggi.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔒 Anti-Sharing System</h3>
+                <p>Keamanan akun terjamin ketat, privasi aktivitas menonton kamu tidak diganggu orang lain.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="pricing-section">
+        <h2>Pilih Paket Langganan Kamu</h2>
+        <p class="sub">Harga ekonomis, akses tanpa batas. Bisa bayar pakai QRIS atau DANA.</p>
+        
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>Paket Hemat</h3>
+                <div class="price-amount">Rp 5rb<span>/ 3 Hari</span></div>
+                <ul class="price-features">
+                    <li>Akses Semua Video</li>
+                    <li>Kualitas Ultra HD</li>
+                    <li>Satu Perangkat Aktif</li>
+                    <li>Bebas Iklan</li>
+                </ul>
+                <a href="/register" class="btn-select">Pilih Paket</a>
+            </div>
+
+            <div class="price-card popular">
+                <div class="badge">Terpopuler</div>
+                <h3>Paket Populer</h3>
+                <div class="price-amount">Rp 15rb<span>/ 10 Hari</span></div>
+                <ul class="price-features">
+                    <li>Akses Semua Video</li>
+                    <li>Kualitas Ultra HD</li>
+                    <li>Satu Perangkat Aktif</li>
+                    <li>Bebas Iklan</li>
+                </ul>
+                <a href="/register" class="btn-select">Pilih Paket</a>
+            </div>
+
+            <div class="price-card">
+                <h3>Paket Sultan</h3>
+                <div class="price-amount">Rp 30rb<span>/ 30 Hari</span></div>
+                <ul class="price-features">
+                    <li>Akses Semua Video</li>
+                    <li>Kualitas Ultra HD</li>
+                    <li>Satu Perangkat Aktif</li>
+                    <li>Bebas Iklan</li>
+                </ul>
+                <a href="/register" class="btn-select">Pilih Paket</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 STREAMINGKU. All rights reserved. Dibuat dengan performa tinggi.</p>
+    </footer>
+
+    <script>
+        // 👀 CEK STATUS LOGIN OTOMATIS
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        const username = sessionStorage.getItem('username');
+
+        // Jika user ternyata sudah login sebelumnya, langsung lempar ke dashboard tanpa loading lama
+        if (isLoggedIn === 'true' && username) {
+            window.location.href = '/dashboard';
+        }
+    </script>
+</body>
+</html>
