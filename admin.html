@@ -6,21 +6,26 @@
     <title>Admin Panel - STREAMINGKU</title>
     <style>
         body { font-family: sans-serif; background: #141414; color: white; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         h1 { border-bottom: 2px solid #e50914; padding-bottom: 10px; font-size: 24px; color: #e50914; }
         
         .pin-box { background: #222; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-top: 50px; text-align: center; }
-        input[type="password"] { background: #333; border: 1px solid #444; color: white; padding: 10px; border-radius: 4px; font-size: 16px; width: 80%; max-width: 300px; margin-bottom: 10px; text-align: center; }
+        input[type="password"], input[type="number"] { background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; }
+        input[type="password"] { width: 80%; max-width: 300px; margin-bottom: 10px; font-size: 16px; }
         
-        /* TAMPILAN KOTAK STATISTIK */
         .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .card-stat { background: #222; padding: 15px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border: 1px solid #333; }
-        .card-stat h3 { margin: 0; font-size: 12px; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
+        .card-stat h3 { margin: 0; font-size: 12px; color: #aaa; text-transform: uppercase; }
         .card-stat p { margin: 8px 0 0 0; font-size: 22px; font-weight: bold; }
         .stat-blue { color: #3498db; }
         .stat-green { color: #2ecc71; }
         .stat-gold { color: #f1c40f; }
         
+        /* BOX PENGATURAN HARGA */
+        .price-settings-box { background: #222; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 25px; text-align: left; }
+        .price-row { display: flex; gap: 15px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+        .price-input-group { display: flex; align-items: center; gap: 5px; }
+
         .user-table-wrapper { overflow-x: auto; background: #222; border-radius: 8px; border: 1px solid #333; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 12px; border-bottom: 1px solid #333; }
@@ -30,8 +35,9 @@
         .status-active { background: #2ecc71; color: #000; }
         .status-expired { background: #ff4d4d; color: white; }
         
-        .btn { background: #e50914; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn { background: #e50914; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
         .btn-secondary { background: #444; }
+        .btn-save { background: #2ecc71; color: #000; padding: 8px 12px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -59,8 +65,29 @@
                     <p id="activeUsers" class="stat-green">0</p>
                 </div>
                 <div class="card-stat">
-                    <h3>Estimasi Penghasilan</h3>
+                    <h3>Estimasi Omset Kasar</h3>
                     <p id="totalIncome" class="stat-gold">Rp 0</p>
+                </div>
+            </div>
+
+            <div class="price-settings-box">
+                <h3 style="margin: 0; color: #e50914; font-size: 14px; text-transform: uppercase;">⚙️ Atur Nominal Harga Paket (Dinamis)</h3>
+                <div class="price-row">
+                    <div class="price-input-group">
+                        <label>3 Hari: Rp</label>
+                        <input type="number" id="price_3" style="width: 80px;">
+                        <button class="btn btn-save" onclick="simpanHarga(3)">Save</button>
+                    </div>
+                    <div class="price-input-group">
+                        <label>10 Hari: Rp</label>
+                        <input type="number" id="price_10" style="width: 80px;">
+                        <button class="btn btn-save" onclick="simpanHarga(10)">Save</button>
+                    </div>
+                    <div class="price-input-group">
+                        <label>30 Hari: Rp</label>
+                        <input type="number" id="price_30" style="width: 80px;">
+                        <button class="btn btn-save" onclick="simpanHarga(30)">Save</button>
+                    </div>
                 </div>
             </div>
 
@@ -72,7 +99,7 @@
                             <th>Username</th>
                             <th>Masa Aktif Berakhir</th>
                             <th>Status</th>
-                            <th>Aksi Perpanjang</th>
+                            <th>Tambah Masa Premium</th>
                         </tr>
                     </thead>
                     <tbody id="userTableBody">
@@ -88,13 +115,13 @@
 
     <script>
         let SEED_PIN = localStorage.getItem('admin_session_pin') || '';
-        const HARGA_PER_BULAN = 29000; // Kamu bisa ubah harga paket bulanan di sini
+        let HARGA_PAKET = { 3: 5000, 10: 15000, 30: 30000 }; // Backup jika database belum dimuat
 
         if (SEED_PIN) tampilkanDashboardAdmin();
 
         function verifikasiPin() {
             SEED_PIN = document.getElementById('adminPinInput').value;
-            if (!SEED_PIN) return alert('PIN tidak boleh kosong!');
+            if (!SEED_PIN) return alert('PIN wajib diisi!');
             tampilkanDashboardAdmin();
         }
 
@@ -108,6 +135,17 @@
                 document.getElementById('adminContent').style.display = 'block';
                 
                 const data = await response.json();
+                
+                // Muat data harga paket dari database ke form input
+                if (data.packages) {
+                    data.packages.forEach(pkg => {
+                        HARGA_PAKET[pkg.days] = pkg.price;
+                        if(document.getElementById(`price_${pkg.days}`)) {
+                            document.getElementById(`price_${pkg.days}`).value = pkg.price;
+                        }
+                    });
+                }
+
                 renderDashboard(data.users, data.serverTime);
 
             } catch (error) {
@@ -122,7 +160,6 @@
 
             let totalPendaftar = users.length;
             let userAktifSkarang = 0;
-
             document.getElementById('totalUsers').innerText = totalPendaftar;
 
             if (totalPendaftar === 0) {
@@ -139,11 +176,10 @@
                 let statusText = "EXPIRED";
                 let badgeClass = "status-expired";
 
-                // Deteksi otomatis jika waktu expired masih di masa depan
                 if (tanggalMasaAktif > serverTime) {
                     statusText = "PREMIUM";
                     badgeClass = "status-active";
-                    userAktifSkarang++; // Tambahkan hitungan user aktif
+                    userAktifSkarang++;
                 }
 
                 const tampilTanggal = user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set';
@@ -154,19 +190,40 @@
                     <td style="color:#aaa;">${tampilTanggal}</td>
                     <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
                     <td>
-                        <button class="btn" onclick="perpanjangUser('${user.username}', 30)">+30 Hari</button>
-                        <button class="btn btn-secondary" onclick="perpanjangUser('${user.username}', 0)" style="margin-left:5px; background:#c0392b;">Reset</button>
+                        <button class="btn" style="background:#27ae60;" onclick="perpanjangUser('${user.username}', 3)">+3H</button>
+                        <button class="btn" style="background:#2980b9;" onclick="perpanjangUser('${user.username}', 10)">+10H</button>
+                        <button class="btn" style="background:#e50914;" onclick="perpanjangUser('${user.username}', 30)">+30H</button>
+                        <button class="btn btn-secondary" onclick="perpanjangUser('${user.username}', 0)" style="background:#c0392b;">Reset</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Pasang angka user aktif ke kotak statistik
             document.getElementById('activeUsers').innerText = userAktifSkarang;
             
-            // Hitung estimasi omset: Jumlah user yang aktif dikali harga langgganan
-            let estimasiOmset = userAktifSkarang * HARGA_PER_BULAN;
+            // Hitung estimasi omset kasar berdasarkan asumsi rata-rata paket sebulan penuh
+            let estimasiOmset = userAktifSkarang * HARGA_PAKET[30];
             document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
+        }
+
+        async function simpanHarga(days) {
+            const newPrice = document.getElementById(`price_${days}`).value;
+            if (!newPrice) return alert('Harga tidak boleh kosong!');
+
+            try {
+                const response = await fetch('/api/admin-manage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
+                    body: JSON.stringify({ action: "update_price", days: days, new_price: newPrice })
+                });
+
+                if (!response.ok) throw new Error('Gagal menyimpan harga baru.');
+                const res = await response.json();
+                alert(res.message);
+                tampilkanDashboardAdmin();
+            } catch (error) {
+                alert(error.message);
+            }
         }
 
         async function perpanjangUser(username, jumlahHari) {
@@ -180,13 +237,13 @@
                 targetTanggalStr = `${yyyy}-${mm}-${dd} 23:59:59`;
             }
 
-            if (!confirm(`Ubah masa aktif user [ ${username} ]?`)) return;
+            if (!confirm(`Ubah masa aktif user [ ${username} ] sebanyak +${jumlahHari} Hari?`)) return;
 
             try {
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
-                    body: JSON.stringify({ username, new_sub_until: targetTanggalStr })
+                    body: JSON.stringify({ action: "update_user", username, new_sub_until: targetTanggalStr })
                 });
 
                 if (!response.ok) throw new Error('Gagal memperbarui database.');
