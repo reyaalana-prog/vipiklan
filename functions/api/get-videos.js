@@ -6,9 +6,9 @@ export async function onRequestGet(context) {
   const API_KEY = "e33bda09-efca-431a-ab6a-20503328-432f-4fc6"; 
 
   try {
-    // JALUR TEPAT: Menggunakan api.bunny.net/stream/ tanpa tambahan /manage/
-    // Dijamin lolos dari Error 530 dan lolos dari Error 404
-    const response = await fetch(`https://api.bunny.net/stream/${LIBRARY_ID}/videos?page=1&perPage=100&orderBy=date`, {
+    // ENDPOINT RESMI PUSAT: Menggunakan /videolibrary/{id}/videos
+    // Ini jalur manajemen video resmi jika ditembak dari api.bunny.net global
+    const response = await fetch(`https://api.bunny.net/videolibrary/${LIBRARY_ID}/videos?page=1&perPage=100`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -24,7 +24,7 @@ export async function onRequestGet(context) {
     const data = await response.json();
 
     // Kirim daftar video ke front-end website kita
-    return new Response(JSON.stringify(data.items), {
+    return new Response(JSON.stringify(data.items || data), {
       status: 200,
       headers: { 
         "Content-Type": "application/json",
