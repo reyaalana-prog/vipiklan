@@ -10,9 +10,21 @@
         h1 { border-bottom: 2px solid #e50914; padding-bottom: 10px; font-size: 24px; color: #e50914; }
         
         .pin-box { background: #222; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-top: 50px; text-align: center; }
-        input[type="password"], input[type="number"] { background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; }
+        input[type="password"], input[type="number"], input[type="text"] { background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; }
         input[type="password"] { width: 80%; max-width: 300px; margin-bottom: 10px; font-size: 16px; }
         
+        /* 🛠️ CSS BARU: KOTAK INPUT PENCARIAN USER */
+        .search-box {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: left;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
         .stats { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
         .card-stat { background: #222; padding: 15px; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border: 1px solid #333; }
         .card-stat h3 { margin: 0; font-size: 12px; color: #aaa; text-transform: uppercase; }
@@ -32,8 +44,8 @@
         th { background: #000; color: #aaa; }
         
         .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .status-active { background: #2ecc71; color: #000; }
-        .status-expired { background: #ff4d4d; color: white; }
+        .status-badge.status-active { background: #2ecc71; color: #000; }
+        .status-badge.status-expired { background: #ff4d4d; color: white; }
         
         .btn { background: #e50914; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
         .btn-secondary { background: #444; }
@@ -75,23 +87,27 @@
                 <div class="price-row">
                     <div class="price-input-group">
                         <label>3 Hari: Rp</label>
-                        <input type="number" id="price_3" style="width: 80px;">
+                        <input type="number" id="price_3" value="5000" style="width: 80px;">
                         <button class="btn btn-save" onclick="simpanHarga(3)">Save</button>
                     </div>
                     <div class="price-input-group">
                         <label>10 Hari: Rp</label>
-                        <input type="number" id="price_10" style="width: 80px;">
+                        <input type="number" id="price_10" value="15000" style="width: 80px;">
                         <button class="btn btn-save" onclick="simpanHarga(10)">Save</button>
                     </div>
                     <div class="price-input-group">
                         <label>30 Hari: Rp</label>
-                        <input type="number" id="price_30" style="width: 80px;">
+                        <input type="number" id="price_30" value="30000" style="width: 80px;">
                         <button class="btn btn-save" onclick="simpanHarga(30)">Save</button>
                     </div>
                 </div>
             </div>
 
-            <h3 style="text-align: left;">Manajemen Hak Akses</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 5px;">
+                <h3 style="margin: 10px 0;">Manajemen Hak Akses</h3>
+                <input type="text" id="userSearchInput" class="search-box" placeholder="🔍 Cari nama username di sini..." onkeyup="jalankanPencarian()">
+            </div>
+
             <div class="user-table-wrapper">
                 <table>
                     <thead>
@@ -115,7 +131,8 @@
 
     <script>
         let SEED_PIN = localStorage.getItem('admin_session_pin') || '';
-        let HARGA_PAKET = { 3: 5000, 10: 15000, 30: 30000 }; // Backup jika database belum dimuat
+        let HARGA_PAKET = { 3: 5000, 10: 15000, 30: 30000 }; 
+        let DATA_USER_GLOBAL = []; // 🛠️ Menampung master data user asli dari database
 
         if (SEED_PIN) tampilkanDashboardAdmin();
 
@@ -136,7 +153,6 @@
                 
                 const data = await response.json();
                 
-                // Muat data harga paket dari database ke form input
                 if (data.packages) {
                     data.packages.forEach(pkg => {
                         HARGA_PAKET[pkg.days] = pkg.price;
@@ -146,7 +162,13 @@
                     });
                 }
 
-                renderDashboard(data.users, data.serverTime);
+                // 🛠️ Amankan data user asli ke variabel penampung global
+                DATA_USER_GLOBAL = data.users || [];
+                
+                // Bersihkan text pencarian setiap kali admin memuat/merefresh dashboard
+                document.getElementById('userSearchInput').value = '';
+                
+                renderDashboard(DATA_USER_GLOBAL, data.serverTime);
 
             } catch (error) {
                 alert(error.message);
@@ -154,18 +176,40 @@
             }
         }
 
-        function renderDashboard(users, serverTime) {
+        // 🛠️ FUNGSI BARU: MENYARING DATA SECARA LIVE SAAT INPUT KETIKAN BERUBAH
+        function jalankanPencarian() {
+            const kataKunci = document.getElementById('userSearchInput').value.toLowerCase().trim();
+            
+            // Filter array global tanpa merusak data asli database di browser
+            const hasilSaringan = DATA_USER_GLOBAL.filter(user => {
+                return user.username.toLowerCase().includes(kataKunci);
+            });
+            
+            // Render ulang isi baris tabel sesuai keyword (gunakan serverTime statis saat ini)
+            renderDashboard(hasilSaringan, Date.now(), true);
+        }
+
+        function renderDashboard(users, serverTime, isSearching = false) {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
 
-            let totalPendaftar = users.length;
-            let userAktifSkarang = 0;
-            document.getElementById('totalUsers').innerText = totalPendaftar;
+            // Update statistik box atas hanya di awal muat, bukan saat mengetik search bar
+            if (!isSearching) {
+                let totalPendaftar = DATA_USER_GLOBAL.length;
+                document.getElementById('totalUsers').innerText = totalPendaftar;
+                
+                let userAktifSkarang = DATA_USER_GLOBAL.filter(u => {
+                    const formatTgl = u.subUntil ? u.subUntil.replace(" ", "T") : '';
+                    return formatTgl ? new Date(formatTgl).getTime() > serverTime : false;
+                }).length;
+                
+                document.getElementById('activeUsers').innerText = userAktifSkarang;
+                let estimasiOmset = userAktifSkarang * HARGA_PAKET[30];
+                document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
+            }
 
-            if (totalPendaftar === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada data user.</td></tr>';
-                document.getElementById('activeUsers').innerText = "0";
-                document.getElementById('totalIncome').innerText = "Rp 0";
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#aaa;">${isSearching ? 'Username tidak ditemukan.' : 'Belum ada data user.'}</td></tr>`;
                 return;
             }
 
@@ -179,7 +223,6 @@
                 if (tanggalMasaAktif > serverTime) {
                     statusText = "PREMIUM";
                     badgeClass = "status-active";
-                    userAktifSkarang++;
                 }
 
                 const tampilTanggal = user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set';
@@ -198,12 +241,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-
-            document.getElementById('activeUsers').innerText = userAktifSkarang;
-            
-            // Hitung estimasi omset kasar berdasarkan asumsi rata-rata paket sebulan penuh
-            let estimasiOmset = userAktifSkarang * HARGA_PAKET[30];
-            document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
         }
 
         async function simpanHarga(days) {
