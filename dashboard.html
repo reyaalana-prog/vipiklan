@@ -97,12 +97,37 @@
         
         .video-card:active { transform: scale(0.95); } /* Efek tekan di HP */
 
+        /* 🛠️ WADAH THUMBNAIL BARU: Mengunci posisi Badge agar presisi menempel di atas gambar */
+        .video-card-thumb-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            overflow: hidden;
+        }
+
         .video-thumbnail { 
             width: 100%; 
-            aspect-ratio: 16/9; 
-            background: #000; 
+            height: 100%;
             object-fit: cover; 
             display: block; 
+        }
+
+        /* 🛠️ BADGE NEW MERAH ALA NETFLIX PREMIUM */
+        .badge-new {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: #e50914; 
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+            z-index: 10;
+            text-transform: uppercase;
         }
 
         .video-info { padding: 8px; text-align: center; }
@@ -344,18 +369,34 @@
                     const detik = (video.length || 0) % 60;
                     const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
 
+                    // 🛠️ LOGIKA OTOMATIS PENENTU LABEL "NEW" (BATAS 3 HARI)
+                    let komponenBadgeNew = '';
+                    if (video.dateCreated) {
+                        const tanggalUpload = new Date(video.dateCreated).getTime();
+                        const tanggalSekarang = Date.now();
+                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; // 3 hari dalam hitungan milidetik
+
+                        // Jika umur video kurang dari 3 hari semenjak di-upload, munculkan badge
+                        if (tanggalSekarang - tanggalUpload < batasTigaHari) {
+                            komponenBadgeNew = `<span class="badge-new">NEW</span>`;
+                        }
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'video-card';
                     
-                    // 🛠️ FIX UTAMA: Perintah scroll otomatis sudah dihapus bersih
                     card.onclick = () => {
                         playVideo(video.guid);
                     };
                     
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
+                    // 🛠️ STRUKTUR DIUBAH AGAR BADGE MENEMPEL PREMANEN DI POJOK GAMBAR THUMBNAIL
                     card.innerHTML = `
-                        <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
+                        <div class="video-card-thumb-wrapper">
+                            ${komponenBadgeNew}
+                            <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
+                        </div>
                         <div class="video-info">
                             <p class="video-meta">⏱️ ${durasi}</p>
                         </div>
@@ -373,7 +414,6 @@
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
         }
 
-        /* ⚠️ SUNTIKAN IMPLEMENTASI RULE 1 SI: Bersihkan menu penutup/Numbered Options di akhir */
         function logout() {
             sessionStorage.clear();
             window.location.href = '/login';
