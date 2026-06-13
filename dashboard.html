@@ -71,7 +71,7 @@
             padding-bottom: 30px;
         }
 
-        /* 🔍 FILTER TOMBOL KATEGORI (KOLOM PENCARIAN SUDAH DIHAPUS) */
+        /* 🔍 FILTER TOMBOL KATEGORI */
         .search-filter-wrapper {
             margin-bottom: 20px;
             display: flex;
@@ -443,7 +443,7 @@
             
             <div id="kontenQris" class="method-content active">
                 <p style="font-size: 12px; color: #666; margin: 5px 0;">Scan QRIS di bawah menggunakan Dana, OVO, GoPay, atau LinkAja</p>
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhrbb0v4NESqsTLGft7Qi24p9T7NTc759i7WD4tQoUb9quuz2wrHfI9NVsl3mXOG9I2FKhBgwITE9S5Mmj1kTRWZMO8yQE66opTWs8Gx_MkJLf137mo3_emk_7ahkIIZXG0mcKvmrYnKIr_b8Fc4l815tnO8p2u4qyj1NBeWa0QtukmtCXwk6zPsGg_hfQ/_s825/photo_2026-06-11_20-45-17.jpg" class="qris-img" alt="QRIS Merchant">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhrbb0v4NESqsTLGft7Qi24p9T7NTc759i7WD4tQoUb9quuz2wrHfI9NVsl3mXOG9I2FKhBgwITE9S5Mmj1kTRWZMO8yQE66opTWs8Gx_MkJLf137mo3_emk_7ahkIIZXG0mcKvmrYnKIr_b8Fc4l815tnO8p2u4qyj1NBeWa0QtukmtCXwk6zPsGg_hfQ/s825/photo_2026-06-11_20-45-17.jpg" class="qris-img" alt="QRIS Merchant">
             </div>
 
             <div id="kontenDana" class="method-content">
@@ -481,7 +481,7 @@
         const ITEM_PER_PAGE = 25;
 
         // 🛠️ ID FOLDER COLLECTION
-        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
+        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0549a1f4020";
         const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -552,7 +552,6 @@
                 return;
             }
 
-            // ✂️ LOGIKA MEMOTONG ARRAY VIDEO (PAGINATION 25 ITEM)
             const totalDataTersaring = videoTersaring.length;
             const totalHalaman = Math.ceil(totalDataTersaring / ITEM_PER_PAGE);
             
@@ -587,7 +586,6 @@
                 
                 const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
-                // 🔥 BERHASIL DIPERBAIKI: Tag text judul video (.video-title-clean) resmi dibuang total!
                 card.innerHTML = `
                     <div class="video-card-thumb-wrapper">
                         ${komponenBadgeNew}
@@ -790,6 +788,7 @@
             });
         }
 
+        // ================= KASIR MANAGEMENT SYSTEM =================
         function bukaBayar(hari, hargaBase) {
             const kodeUnik = Math.floor(100 + Math.random() * 899);
             hargaFinalGlobal = hargaBase + kodeUnik; detailHariGlobal = hari;
@@ -803,11 +802,11 @@
             const tQris = document.getElementById('tabQris'); const tDana = document.getElementById('tabDana');
             const kQris = document.getElementById('kontenQris'); const kDana = document.getElementById('kontenDana');
             if (metode === 'qris') { tQris.classList.add('active'); tDana.classList.remove('active'); kQris.classList.add('active'); kDana.classList.remove('active'); }
-            else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kDana.classList.remove('active'); }
+            // ⚡ BERHASIL DIPERBAIKI: Mengembalikan fungsi target kontens penutup DANA (bukan kQuick)
+            else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kQris.classList.remove('active'); }
             updateLinkWhatsApp();
         }
 
-        // WhatsApp Sender integration
         function updateLinkWhatsApp() {
             const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
             const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${detailHariGlobal} Hari sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
