@@ -453,10 +453,10 @@
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
 
-        // 🛠️ MASUKKAN ID COLLECTION (FOLDER) KAMU DI SINI:
-        // Ambil angkanya dari dashboard Bunny.net Stream bagian "Collections"
+        // 🛠️ ID COLLECTION FOLDER BUNNY NET
         const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
         const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
+        // ⚠️ Jangan lupa isi tanda kutip di bawah ini dengan ID folder hemat aslimu dari Bunny net ya!
         const FOLDER_ID_HEMAT   = "TEMPEL_ID_FOLDER_PAKET_HEMAT_KAMU_DISINI";
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -476,6 +476,7 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > sekarang) {
+                    // 🔥 BERHASIL DIPERBAIKI: Rumus sisa hari murni bersih bebas dari iklan nyempil!
                     sisaHariUser = Math.ceil((tanggalMasaAktif - sekarang) / (1000 * 60 * 60 * 24));
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
@@ -490,6 +491,7 @@
         function gantiKategoriFilter(namaKategori) {
             kategoriAktifGlobal = namaKategori;
             const semuaTombol = document.querySelectorAll('.btn-cat-filter');
+            semuallTombol = document.querySelectorAll('.btn-cat-filter');
             semuaTombol.forEach(btn => btn.classList.remove('active'));
             document.getElementById(`cat-${namaKategori}`).classList.add('active');
             jalankanFilterKatalog();
@@ -500,7 +502,7 @@
             const container = document.getElementById('videoList');
             container.innerHTML = '';
 
-            // 1. FILTER LOCK UTAMA: Jika user paket hemat (sisa hari <= 3), kunci kasta video murni ke folder hemat
+            // 1. FILTER LOCK UTAMA: Paket hemat (sisa hari <= 3) mengunci katalog murni ke folder hemat
             let videoTersaring = databaseVideosGlobal;
             if (sisaHariUser <= 3) {
                 videoTersaring = databaseVideosGlobal.filter(video => {
@@ -508,7 +510,7 @@
                 });
             }
 
-            // 2. FILTER TOMBOL KATEGORI: Saring otomatis berdasarkan ID Collection folder Bunny.net
+            // 2. FILTER TOMBOL KATEGORI: Saring berbasis Collection ID folder Bunny.net
             if (kategoriAktifGlobal !== 'semua') {
                 videoTersaring = videoTersaring.filter(video => {
                     const idFolderVideo = String(video.collectionId);
@@ -519,7 +521,7 @@
                 });
             }
 
-            // 3. FILTER SEARCH TEXT: Saring berdasarkan teks pencarian judul secara real-time
+            // 3. FILTER SEARCH TEXT: Saring real-time berbasis ketikan kolom pencarian
             if (kataKunciSari !== '') {
                 videoTersaring = videoTersaring.filter(video => {
                     const judulKecil = (video.title || '').toLowerCase();
@@ -736,6 +738,7 @@
             navigator.clipboard.writeText(document.getElementById('danaNumberText').innerText).then(() => alert('Nomor DANA berhasil disalin!'));
         }
 
+        // ================= BANNING INHERIT PROTECTION =================
         function tutupBayar() { document.getElementById('modalBayar').style.display = 'none'; }
         function logout() { sessionStorage.clear(); window.location.href = '/login'; }
     </script>
