@@ -369,15 +369,15 @@
                     const detik = (video.length || 0) % 60;
                     const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
 
-                    // 🛠️ LOGIKA OTOMATIS PENENTU LABEL "NEW" (BATAS 3 HARI)
+                    // 🛠️ PERBAIKAN LOGIKA UTAMA: Pengecekan Umur Video Berbasis UTC Milidetik murni (Anti-Bug Zona Waktu)
                     let komponenBadgeNew = '';
                     if (video.dateCreated) {
-                        const tanggalUpload = new Date(video.dateCreated).getTime();
+                        const tanggalUpload = Date.parse(video.dateCreated); 
                         const tanggalSekarang = Date.now();
-                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; // 3 hari dalam hitungan milidetik
+                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; // Selisih waktu maksimal 3 hari
 
-                        // Jika umur video kurang dari 3 hari semenjak di-upload, munculkan badge
-                        if (tanggalSekarang - tanggalUpload < batasTigaHari) {
+                        // Jika umur unggahan video kurang dari 3 hari, render template badge NEW
+                        if (tanggalSekarang - tanggalUpload < batasTigaHari && tanggalSekarang >= tanggalUpload) {
                             komponenBadgeNew = `<span class="badge-new">NEW</span>`;
                         }
                     }
@@ -391,7 +391,6 @@
                     
                     const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
 
-                    // 🛠️ STRUKTUR DIUBAH AGAR BADGE MENEMPEL PREMANEN DI POJOK GAMBAR THUMBNAIL
                     card.innerHTML = `
                         <div class="video-card-thumb-wrapper">
                             ${komponenBadgeNew}
