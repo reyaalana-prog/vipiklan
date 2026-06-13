@@ -100,7 +100,6 @@
         
         .video-card:active { transform: scale(0.95); } /* Efek tekan di HP */
 
-        /* WADAH THUMBNAIL BARU: Mengunci posisi Badge agar presisi menempel di atas gambar */
         .video-card-thumb-wrapper {
             position: relative;
             width: 100%;
@@ -116,7 +115,6 @@
             display: block; 
         }
 
-        /* BADGE NEW MERAH ALA NETFLIX PREMIUM */
         .badge-new {
             position: absolute;
             top: 6px;
@@ -133,7 +131,7 @@
             text-transform: uppercase;
         }
 
-        /* 💾 TOMBOL SIMPAN KECIL DI ATAS KARTU VIDEO */
+        /* TOMBOL SIMPAN KECIL DI ATAS KARTU VIDEO */
         .btn-save-video {
             position: absolute;
             top: 6px;
@@ -168,12 +166,54 @@
         .modal-content { background: #fff; color: #000; width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; text-align: center; position: relative; animation: fadeIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 26px; cursor: pointer; color: #888; font-weight: bold; }
         
-        /* Navigasi Internal Menu Profil (Tabs Baru) */
-        .profile-menu-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin-bottom: 15px; }
-        .p-tab-btn { flex: 1; border: none; background: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 12px; color: #555; transition: 0.2s; }
+        /* Navigasi Internal Menu Profil (3 Tabs Berjejer) */
+        .profile-menu-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin-bottom: 15px; gap: 4px; }
+        .p-tab-btn { flex: 1; border: none; background: none; padding: 8px 4px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 11px; color: #555; transition: 0.2s; white-space: nowrap; }
         .p-tab-btn.active { background: #2ecc71; color: #fff; }
         .profile-section-content { display: none; text-align: left; }
         .profile-section-content.active { display: block; }
+
+        /* 📊 DESAIN KARTU DIGITAL STATUS VIP MEMBER */
+        .member-card {
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
+            color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .member-card::before {
+            content: "VIP ACCESS";
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 40px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.03);
+            letter-spacing: 2px;
+        }
+        .member-card h4 { margin: 0 0 10px 0; font-size: 16px; color: #f1c40f; display: flex; align-items: center; gap: 5px; }
+        .member-info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; }
+        .member-info-row span:last-child { font-weight: bold; color: #2ecc71; }
+        
+        /* Tombol Perpanjang Paket Premium di Dalam Profil */
+        .btn-renew-premium {
+            background: #e50914;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(229,9,20,0.3);
+            transition: 0.2s;
+        }
+        .btn-renew-premium:active { transform: scale(0.98); }
 
         /* Form Bergaya Minimalis Untuk Ganti Password */
         .input-group { text-align: left; margin-bottom: 12px; }
@@ -195,7 +235,6 @@
         /* Konten Metode Kasir */
         .method-content { display: none; }
         .method-content.active { display: block; }
-
         .qris-img { width: 100%; max-width: 220px; margin: 5px 0; border: 1px solid #ddd; border-radius: 10px; display: inline-block; }
         
         /* Box Akun DANA */
@@ -208,6 +247,10 @@
         .price-box { background: #f8f9fa; border: 2px dashed #e50914; padding: 12px; border-radius: 10px; margin: 12px 0; }
         .price-box h1 { margin: 0; color: #e50914; font-size: 26px; font-family: monospace; }
         .btn-wa { background: #25d366; color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; text-decoration: none; display: block; box-sizing: border-box; box-shadow: 0 4px 10px rgba(37,211,102,0.3); }
+
+        /* Area Pilihan Paket Ekstensi Baru Saat Perpanjang (Awalnya Sembunyi) */
+        #pilihanPaketPerpanjang { margin-top: 15px; display: none; animation: fadeIn 0.3s ease; }
+        .judul-perpanjang { font-size: 13px; color: #333; margin: 10px 0; font-weight: bold; text-align: left; }
 
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
@@ -264,21 +307,62 @@
         </div>
     </div>
 
+    <!-- 👤 MODAL PROFIL (STATUS AKUN, VIDEO TERSIMPAN, & GANTI PASSWORD) -->
     <div id="modalProfil" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupProfil()">&times;</span>
             
+            <!-- Tab Menu Pilihan Internal Modal (3 Menu) -->
             <div class="profile-menu-tabs">
-                <button id="pTabVideo" class="p-tab-btn active" onclick="gantiMenuProfil('video')">💾 Video Tersimpan</button>
-                <button id="pTabSandi" class="p-tab-btn" onclick="gantiMenuProfil('sandi')">🔐 Ganti Password</button>
+                <button id="pTabStatus" class="p-tab-btn active" onclick="gantiMenuProfil('status')">📊 Status VIP</button>
+                <button id="pTabVideo" class="p-tab-btn" onclick="gantiMenuProfil('video')">💾 Tersimpan</button>
+                <button id="pTabSandi" class="p-tab-btn" onclick="gantiMenuProfil('sandi')">🔐 Ganti Sandi</button>
             </div>
             
-            <div id="profilKontenVideo" class="profile-section-content active">
-                <h4 style="margin: 0 0 10px 0; color: #333;">Daftar Tonton Nanti:</h4>
-                <div id="savedVideosList" class="saved-videos-container">
+            <!-- 📊 KONTEN 1: STATUS AKUN MEMBER & TOMBOL PERPANJANG -->
+            <div id="profilKontenStatus" class="profile-section-content active">
+                <div class="member-card">
+                    <h4>👑 STREAMINGKU MEMBER CARD</h4>
+                    <div class="member-info-row">
+                        <span>Nama Pengguna</span>
+                        <span id="memberUsername" style="color:#fff;">...</span>
                     </div>
+                    <div class="member-info-row">
+                        <span>Status Layanan</span>
+                        <span>PREMIUM ACTIVE</span>
+                    </div>
+                    <div class="member-info-row">
+                        <span>Masa Berlaku</span>
+                        <span id="memberExpiry" style="color: #f1c40f;">...</span>
+                    </div>
+                </div>
+
+                <button class="btn-renew-premium" id="btnKlikPerpanjang" onclick="tampilkanOpsiPaketPerpanjang()">⚡ PERPANJANG PAKET SEKARANG</button>
+
+                <!-- Pilihan 3 Paket Perpanjang Instan (Muncul setelah tombol di atas di-klik) -->
+                <div id="pilihanPaketPerpanjang">
+                    <p class="judul-perpanjang">Pilih Durasi Ekstensi Paket:</p>
+                    <div class="package-options" style="margin-top: 5px;">
+                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(3, 5000)">
+                            🚀 Paket Hemat (3 Hari) <span style="font-size:11px;">Rp 5.000</span>
+                        </button>
+                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(10, 15000)">
+                            🔥 Paket Populer (10 Hari) <span style="font-size:11px;">Rp 15.000</span>
+                        </button>
+                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(30, 30000)">
+                            👑 Paket Sultan (30 Hari) <span style="font-size:11px;">Rp 30.000</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
+            <!-- 💾 KONTEN 2: VIDEO TERSIMPAN -->
+            <div id="profilKontenVideo" class="profile-section-content">
+                <h4 style="margin: 0 0 10px 0; color: #333;">Daftar Tonton Nanti:</h4>
+                <div id="savedVideosList" class="saved-videos-container"></div>
+            </div>
+
+            <!-- 🔐 KONTEN 3: FORM GANTI PASSWORD -->
             <div id="profilKontenSandi" class="profile-section-content">
                 <h4 style="margin: 0 0 15px 0; color: #333;">Pengaturan Kata Sandi</h4>
                 <div class="input-group">
@@ -298,6 +382,7 @@
         </div>
     </div>
 
+    <!-- 📱 POP-UP BOX KASIR PEMBAYARAN AUTOMATIC -->
     <div id="modalBayar" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupBayar()">&times;</span>
@@ -341,7 +426,7 @@
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
         let sisaHariUser = 0; 
-        let databaseVideosGlobal = []; // Menyimpan master data video global untuk pencarian data bookmark
+        let databaseVideosGlobal = []; 
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const username = sessionStorage.getItem('username');
@@ -370,12 +455,24 @@
             }
         }
 
-        // ================= LOGIKA POP-UP MENU PROFIL (TABS BARU) =================
+        // ================= LOGIKA INTERKONEKSI MENU PROFIL TRIPLE TABS =================
         function bukaProfil() {
             document.getElementById('profileUsername').value = username;
             document.getElementById('oldPassword').value = '';
             document.getElementById('newPassword').value = '';
-            gantiMenuProfil('video'); // Default buka video tersimpan duluan
+            
+            // Masukkan data dinamis ke dalam Kartu Member VIP
+            document.getElementById('memberUsername').innerText = username;
+            const formatTanggalDb = subUntil ? subUntil.replace(" ", "T") : '';
+            document.getElementById('memberExpiry').innerText = subUntil && subUntil !== 'expired' && subUntil !== 'null'
+                ? new Date(formatTanggalDb).toLocaleString('id-ID')
+                : "Sudah Habis Masa Aktif";
+
+            // Sembunyikan opsi paket ekstensi perpanjang ke posisi default awal
+            document.getElementById('pilihanPaketPerpanjang').style.display = 'none';
+            document.getElementById('btnKlikPerpanjang').style.display = 'block';
+
+            gantiMenuProfil('status'); // Default buka status VIP member duluan
             document.getElementById('modalProfil').style.display = 'flex';
         }
 
@@ -384,23 +481,40 @@
         }
 
         function gantiMenuProfil(menu) {
+            const tabStatus = document.getElementById('pTabStatus');
             const tabVideo = document.getElementById('pTabVideo');
             const tabSandi = document.getElementById('pTabSandi');
+            
+            const kontenStatus = document.getElementById('profilKontenStatus');
             const kontenVideo = document.getElementById('profilKontenVideo');
             const kontenSandi = document.getElementById('profilKontenSandi');
 
-            if (menu === 'video') {
+            // Reset seluruh kelas active tab & konten
+            [tabStatus, tabVideo, tabSandi].forEach(t => t.classList.remove('active'));
+            [kontenStatus, kontenVideo, kontenSandi].forEach(k => k.classList.remove('active'));
+
+            if (menu === 'status') {
+                tabStatus.classList.add('active');
+                kontenStatus.classList.add('active');
+            } else if (menu === 'video') {
                 tabVideo.classList.add('active');
-                tabSandi.classList.remove('active');
                 kontenVideo.classList.add('active');
-                kontenSandi.classList.remove('active');
-                renderSavedVideosArea(); // Render ulang list tontonan pas dibuka
+                renderSavedVideosArea();
             } else {
                 tabSandi.classList.add('active');
-                tabVideo.classList.remove('active');
                 kontenSandi.classList.add('active');
-                kontenVideo.classList.remove('active');
             }
+        }
+
+        // Fungsi pemicu opsi menu perpanjang paket
+        function tampilkanOpsiPaketPerpanjang() {
+            document.getElementById('btnKlikPerpanjang').style.display = 'none';
+            document.getElementById('pilihanPaketPerpanjang').style.display = 'block';
+        }
+
+        function eksekusiPerpanjang(hari, hargaBase) {
+            tutupProfil(); // Tutup modal profil secara otomatis
+            bukaBayar(hari, hargaBase); // Buka modal kasir pembayaran otomatis
         }
 
         async function gantiPassword() {
@@ -417,12 +531,7 @@
                 const response = await fetch('/api/change-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user: username,
-                        token: token,
-                        oldPassword: oldPw,
-                        newPassword: newPw
-                    })
+                    body: JSON.stringify({ user: username, token: token, oldPassword: oldPw, newPassword: newPw })
                 });
 
                 const hasil = await response.json();
@@ -437,33 +546,28 @@
             }
         }
 
-        // ================= LOGIKA UTAMA FITUR SIMPAN VIDEO (LOCALSTORAGE) =================
+        // ================= LOGIKA FITUR SIMPAN VIDEO (LOCALSTORAGE) =================
         function ambilDaftarSimpan() {
-            // Mengunci key penyimpanan unik per masing-masing username agar tidak tertukar akun
             const keyPenyimpanan = `saved_videos_${username}`;
             const dataMentah = localStorage.getItem(keyPenyimpanan);
             return dataMentah ? JSON.parse(dataMentah) : [];
         }
 
         function toggleSimpanVideo(e, guid, thumbName) {
-            e.stopPropagation(); // Mencegah video terputar otomatis saat menekan tombol simpan
+            e.stopPropagation(); 
             const keyPenyimpanan = `saved_videos_${username}`;
             let listSimpan = ambilDaftarSimpan();
-
             const index = listSimpan.findIndex(item => item.guid === guid);
 
             if (index > -1) {
-                // Jika sudah ada, berarti user berniat menghapus dari daftar simpan
                 listSimpan.splice(index, 1);
                 e.target.classList.remove('saved');
                 e.target.innerText = "💾 Simpan";
             } else {
-                // Jika belum ada, masukkan data objek baru ke dalam array
                 listSimpan.push({ guid: guid, thumbnailFileName: thumbName });
                 e.target.classList.add('saved');
                 e.target.innerText = "⭐ Tersimpan";
             }
-
             localStorage.setItem(keyPenyimpanan, JSON.stringify(listSimpan));
         }
 
@@ -475,7 +579,6 @@
             listSimpan = listSimpan.filter(item => item.guid !== guid);
             localStorage.setItem(keyPenyimpanan, JSON.stringify(listSimpan));
             
-            // Render ulang isi menu & perbarui tombol di halaman utama biar sinkron murni
             renderSavedVideosArea();
             loadBunnyVideosDariCache(); 
         }
@@ -493,14 +596,12 @@
             listSimpan.forEach(item => {
                 const cardItem = document.createElement('div');
                 cardItem.className = 'saved-item-card';
-                
                 cardItem.onclick = () => {
                     playVideo(item.guid);
                     tutupProfil();
                 };
 
                 const urlThumb = `https://vz-99c5be47-12d.b-cdn.net/${item.guid}/${item.thumbnailFileName}`;
-
                 cardItem.innerHTML = `
                     <img class="saved-item-thumb" src="${urlThumb}" onerror="this.src='https://via.placeholder.com/160x90/222/fff?text=No+Thumb'">
                     <button class="saved-item-remove" onclick="hapusDariMenuProfil(event, '${item.guid}')">❌ Hapus</button>
@@ -517,7 +618,6 @@
 
             document.getElementById('tampilHarga').innerText = "Rp " + hargaFinalGlobal.toLocaleString('id-ID');
             updateLinkWhatsApp();
-            
             gantiMetode('qris');
             document.getElementById('modalBayar').style.display = 'flex';
         }
@@ -576,9 +676,8 @@
                 }
 
                 if (videos.error) throw new Error(videos.error);
-                
-                databaseVideosGlobal = videos; // Daftarkan data ke global variabel
-                loadBunnyVideosDariCache(); // Panggil fungsi perakit DOM komponen kartu
+                databaseVideosGlobal = videos; 
+                loadBunnyVideosDariCache(); 
 
             } catch (error) {
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
@@ -602,7 +701,6 @@
                 return;
             }
 
-            // Putar video indeks pertama otomatis di awal hanya jika player masih kosong
             const player = document.getElementById('bunnyPlayer');
             if ((player.src === window.location.href || player.src === "") && videoTersaring[0] && videoTersaring[0].guid) {
                 playVideo(videoTersaring[0].guid);
@@ -627,7 +725,6 @@
                     }
                 }
 
-                // Cek status apakah video ini ada di dalam list bookmark localstorage
                 const sudahDisimpan = listSimpan.some(item => item.guid === video.guid);
                 const teksTombol = sudahDisimpan ? "⭐ Tersimpan" : "💾 Simpan";
                 const kelasTombol = sudahDisimpan ? "btn-save-video saved" : "btn-save-video";
