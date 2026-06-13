@@ -210,6 +210,56 @@
         .video-title-clean { font-size: 12px; font-weight: bold; margin: 0 0 4px 0; color: #fff; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
         .video-meta { font-size: 10px; color: #aaa; margin: 0; }
 
+        /* 🎛️ STYLE NAVIGASI PAGINATION */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 35px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-page-nav {
+            background: #222;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-page-nav:disabled {
+            background: #111;
+            color: #555;
+            border-color: #222;
+            cursor: not-allowed;
+        }
+
+        .btn-page-number {
+            background: #222;
+            color: #ccc;
+            border: 1px solid #444;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-page-number.active {
+            background: #e50914;
+            color: #fff;
+            border-color: #e50914;
+        }
+
         /* MODAL DESIGNS */
         .alert-expired { color: #ff4d4d; background: #2a1b1b; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; text-align: center; }
         .package-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
@@ -298,10 +348,9 @@
                 ✅ Premium Aktif sampai: <span id="dateDisplay"></span>
             </p>
 
-            <!-- 🔍 SEARCH BAR & FILTER TOMBOL KATEGORI (MURNI HIJAB & PELAJAR TANPA BUTTON HEMAT) -->
             <div class="search-filter-wrapper">
                 <div class="search-box-container">
-                    <input type="text" id="searchVideoInput" class="search-input" placeholder="🔍 Cari judul video premium..." oninput="jalankanFilterKatalog()">
+                    <input type="text" id="searchVideoInput" class="search-input" placeholder="🔍 Cari judul video premium..." oninput="jalankanFilterKatalog(true)">
                 </div>
                 <div class="category-scroll-row">
                     <button class="btn-cat-filter active" id="cat-semua" onclick="gantiKategoriFilter('semua')">✨ Semua Video</button>
@@ -314,6 +363,8 @@
             <div id="videoList" class="video-grid">
                 <p style="color: #aaa;">Sedang mengambil daftar video...</p>
             </div>
+
+            <div id="paginationArea" class="pagination-container"></div>
         </div>
     </div>
 
@@ -323,7 +374,6 @@
             <p>Masa aktif kamu sudah kedaluwarsa. Silakan pilih paket di bawah untuk memperpanjang paket premium:</p>
             
             <div class="package-options">
-                <!-- 💰 PAKET 3 HARI TETAP ADA DI SINI -->
                 <button class="btn-pkg" onclick="bukaBayar(3, 5000)">
                     🚀 Paket Hemat (3 Hari) <span>Rp 5.000</span>
                 </button>
@@ -337,7 +387,6 @@
         </div>
     </div>
 
-    <!-- 👤 MODAL PROFIL -->
     <div id="modalProfil" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupProfil()">&times;</span>
@@ -370,7 +419,6 @@
                 <div id="pilihanPaketPerpanjang">
                     <p class="judul-perpanjang">Pilih Durasi Ekstensi Paket:</p>
                     <div class="package-options" style="margin-top: 5px;">
-                        <!-- 💰 PAKET 3 HARI TETAP ADA DI MENU PROFIL -->
                         <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(3, 5000)">
                             🚀 Paket Hemat (3 Hari) <span style="font-size:11px;">Rp 5.000</span>
                         </button>
@@ -408,7 +456,6 @@
         </div>
     </div>
 
-    <!-- 📱 POP-UP BOX KASIR PEMBAYARAN -->
     <div id="modalBayar" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupBayar()">&times;</span>
@@ -454,8 +501,12 @@
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
 
-        // 🛠️ ID FOLDER COLLECTION BERSALIN DARI IMAGE_EF4EB4.JPG
-        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
+        // 🎛️ VARIABEL PAGINATION (25 VIDEO PER HALAMAN)
+        let halamanAktifGlobal = 1;
+        const ITEM_PER_PAGE = 25;
+
+        // 🛠| ID FOLDER COLLECTION DARI IMAGE_EF4EB4.JPG
+        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0549a1f4020";
         const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -475,7 +526,6 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > sekarang) {
-                    // MURNI BERSIH DARI IKLAN NYEMPIL NYEBELIN
                     sisaHariUser = Math.ceil((tanggalMasaAktif - sekarang) / (1000 * 60 * 60 * 24));
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
@@ -486,32 +536,27 @@
             }
         }
 
-        // ================= KONTROL FILTER AUTOMATIC HARMONIZATION =================
+        // ================= KONTROL FILTER AUTOMATIC & HALAMAN =================
         function gantiKategoriFilter(namaKategori) {
             kategoriAktifGlobal = namaKategori;
             const semuaTombol = document.querySelectorAll('.btn-cat-filter');
             semuaTombol.forEach(btn => btn.classList.remove('active'));
             document.getElementById(`cat-${namaKategori}`).classList.add('active');
-            jalankanFilterKatalog();
+            jalankanFilterKatalog(true); // Reset ke halaman 1 jika ganti kategori
         }
 
-        function jalankanFilterKatalog() {
+        function jalankanFilterKatalog(resetKeHalamanSatu = false) {
+            if (resetKeHalamanSatu) {
+                halamanAktifGlobal = 1;
+            }
+
             const kataKunciSari = document.getElementById('searchVideoInput').value.toLowerCase().trim();
             const container = document.getElementById('videoList');
             container.innerHTML = '';
 
             let videoTersaring = databaseVideosGlobal;
 
-            // 1. FILTER LOCK UTAMA: Pengecekan sisa hari langganan pembeli paket hemat (<= 3 hari)
-            // Sistem mengecek tag "hemat" di dalam kolom tags video Bunny Net secara otomatis
-            if (sisaHariUser <= 3) {
-                videoTersaring = databaseVideosGlobal.filter(video => {
-                    const tags = video.tags ? video.tags.toLowerCase() : '';
-                    return tags.includes('hemat') || tags === ''; 
-                });
-            }
-
-            // 2. FILTER TOMBOL KATEGORI: Saring murni berbasis ID folder Hijab & Pelajar saja
+            // 1. FILTER TOMBOL KATEGORI: Saring berbasis ID folder Hijab & Pelajar saja
             if (kategoriAktifGlobal !== 'semua') {
                 videoTersaring = videoTersaring.filter(video => {
                     const idFolderVideo = String(video.collectionId);
@@ -521,7 +566,7 @@
                 });
             }
 
-            // 3. FILTER SEARCH TEXT: Saring real-time ketikan kata kunci judul
+            // 2. FILTER SEARCH TEXT: Saring real-time ketikan kata kunci judul
             if (kataKunciSari !== '') {
                 videoTersaring = videoTersaring.filter(video => {
                     const judulKecil = (video.title || '').toLowerCase();
@@ -531,12 +576,21 @@
 
             if (videoTersaring.length === 0) {
                 container.innerHTML = `<p style="color: #aaa; grid-column: 1/-1; text-align: center; padding: 20px;">🔍 Ups, video yang kamu cari tidak ditemukan...</p>`;
+                document.getElementById('paginationArea').innerHTML = '';
                 return;
             }
 
+            // ✂️ LOGIKA MEMOTONG ARRAY VIDEO (PAGINATION 25 ITEM)
+            const totalDataTersaring = videoTersaring.length;
+            const totalHalaman = Math.ceil(totalDataTersaring / ITEM_PER_PAGE);
+            
+            const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
+            const indeksAkhir = indeksAwal + ITEM_PER_PAGE;
+            const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAkhir);
+
             const listSimpan = ambilDaftarSimpan();
 
-            videoTersaring.forEach(video => {
+            videoHalamanIni.forEach(video => {
                 if (!video.guid) return;
                 const menit = Math.floor((video.length || 0) / 60);
                 const detik = (video.length || 0) % 60;
@@ -574,6 +628,45 @@
                 `;
                 container.appendChild(card);
             });
+
+            // RENDER TOMBOL PAGINATION DI BAWAH KATALOG
+            buatTombolNavigasiHalaman(totalHalaman);
+        }
+
+        function buatTombolNavigasiHalaman(totalHalaman) {
+            const areaPaginasi = document.getElementById('paginationArea');
+            areaPaginasi.innerHTML = '';
+
+            if (totalHalaman <= 1) return; // Jika cuma 1 halaman, sembunyikan navigasi
+
+            // Tombol Back (Sebelumnya)
+            const btnPrev = document.createElement('button');
+            btnPrev.className = 'btn-page-nav';
+            btnPrev.innerText = '⬅️ Prev';
+            btnPrev.disabled = halamanAktifGlobal === 1;
+            btnPrev.onclick = () => { halamanAktifGlobal--; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
+            areaPaginasi.appendChild(btnPrev);
+
+            // Daftar Angka Halaman
+            for (let i = 1; i <= totalHalaman; i++) {
+                const btnNum = document.createElement('button');
+                btnNum.className = i === halamanAktifGlobal ? 'btn-page-number active' : 'btn-page-number';
+                btnNum.innerText = i;
+                btnNum.onclick = () => { halamanAktifGlobal = i; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
+                areaPaginasi.appendChild(btnNum);
+            }
+
+            // Tombol Next (Berikutnya)
+            const btnNext = document.createElement('button');
+            btnNext.className = 'btn-page-nav';
+            btnNext.innerText = 'Next ➡️';
+            btnNext.disabled = halamanAktifGlobal === totalHalaman;
+            btnNext.onclick = () => { halamanAktifGlobal++; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
+            areaPaginasi.appendChild(btnNext);
+        }
+
+        function scrollKeKatalogAtas() {
+            document.querySelector('.playlist-title').scrollIntoView({ behavior: 'smooth' });
         }
 
         // ================= LOADING UTAMA VIDEO BUNNY NET =================
@@ -592,7 +685,7 @@
                 if (videos.error) throw new Error(videos.error);
                 databaseVideosGlobal = videos; 
 
-                jalankanFilterKatalog();
+                jalankanFilterKatalog(true);
 
                 const player = document.getElementById('bunnyPlayer');
                 if (databaseVideosGlobal.length > 0 && player.src === "") {
