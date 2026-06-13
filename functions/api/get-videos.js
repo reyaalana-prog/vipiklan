@@ -31,7 +31,8 @@ export async function onRequestGet(context) {
     const LIBRARY_ID = "680881"; 
     const API_KEY = "9a5faa61-f848-47c9-9d03608118cd-7985-4fcc"; 
 
-    const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos?page=1&perPage=100`, {
+    // 🔥 BERHASIL DIPERBAIKI: perPage dinaikkan menjadi 1000 agar seluruh 170 video nampil sekaligus
+    const response = await fetch(`https://video.bunnycdn.com/library/${LIBRARY_ID}/videos?page=1&perPage=1000`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
