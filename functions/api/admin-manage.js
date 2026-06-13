@@ -16,7 +16,7 @@ export async function onRequest(context) {
   const db = env.DB;
   if (!db) {
     return new Response(JSON.stringify({ error: "Environment variable 'DB' tidak ditemukan!" }), { 
-      status: 500,
+      status: 500, 
       headers: { "Content-Type": "application/json" }
     });
   }
@@ -49,11 +49,53 @@ export async function onRequest(context) {
       const body = await request.json();
       const { action } = body;
 
-      // Fitur A: Perpanjang Akun User
+      // 🔥 FITUR A (BERHASIL DIPERBAIKI): Perpanjang Akun User dengan Akumulasi Otomatis
       if (action === "update_user") {
-        const { username, new_sub_until } = body;
-        await db.prepare("UPDATE users SET subscription_until = ? WHERE username = ?").bind(new_sub_until, username).run();
-        return new Response(JSON.stringify({ success: true, message: `Masa aktif ${username} berhasil diperbarui!` }));
+        const { username, days_to_add } = body; 
+        
+        // 1. Ambil data subscription_until terakhir milik user dari database D1
+        const userData = await db.prepare("SELECT subscription_until FROM users WHERE username = ?").bind(username).first();
+        
+        if (!userData) {
+          return new Response(JSON.stringify({ error: "User tidak ditemukan!" }), { status: 404 });
+        }
+
+        const sekarang = new Date();
+        let basisTanggal = sekarang; // Default: Jika expired, hitung dari hari ini
+
+        if (userData.subscription_until) {
+          // Ganti spasi dengan huruf 'T' agar format datetime ISO terbaca aman di semua platform javascript
+          const formatIso = userData.subscription_until.replace(" ", "T");
+          const tanggalDb = new Date(formatIso);
+          
+          // Jika tanggal di DB ternyata masih hidup (belum expired), jadikan tanggal DB sebagai basis akumulasi!
+          if (tanggalDb.getTime() > sekarang.getTime()) {
+            basisTanggal = tanggalDb;
+          }
+        }
+
+        // 2. Tambahkan jumlah hari baru (misal ditambahkan 3 hari atau 10 hari)
+        // Pastikan days_to_add dikonversi ke integer agar tidak terjadi penggabungan teks string
+        const durasiHari = parseInt(days_to_add) || 3; 
+        basisTanggal.setDate(basisTanggal.getDate() + durasiHari);
+
+        // 3. Konversi kembali ke format standar database "YYYY-MM-DD HH:MM:SS"
+        const yyyy = basisTanggal.getFullYear();
+        const mm = String(basisTanggal.getMonth() + 1).padStart(2, '0');
+        const dd = String(basisTanggal.getDate()).padStart(2, '0');
+        const hh = String(basisTanggal.getHours()).padStart(2, '0');
+        const min = String(basisTanggal.getMinutes()).padStart(2, '0');
+        const ss = String(basisTanggal.getSeconds()).padStart(2, '0');
+        
+        const tanggalFinalDb = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+
+        // 4. Eksekusi simpan pembaharuan akumulasi permanen ke database Cloudflare D1
+        await db.prepare("UPDATE users SET subscription_until = ? WHERE username = ?").bind(tanggalFinalDb, username).run();
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: `Masa aktif ${username} sukses ditambah ${durasiHari} hari! Tanggal baru: ${tanggalFinalDb}` 
+        }));
       }
 
       // Fitur B: Update Harga Paket Baru dari Panel Admin
