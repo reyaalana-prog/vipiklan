@@ -31,6 +31,8 @@
         }
 
         header h2 { font-size: 16px; margin: 0; }
+        .header-buttons { display: flex; gap: 8px; }
+        .btn-profile { background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-logout { background: #333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
 
         /* 3. AREA VIDEO (BAGIAN ATAS - TERKUNCI) */
@@ -97,7 +99,7 @@
         
         .video-card:active { transform: scale(0.95); } /* Efek tekan di HP */
 
-        /* 🛠️ WADAH THUMBNAIL BARU: Mengunci posisi Badge agar presisi menempel di atas gambar */
+        /* WADAH THUMBNAIL BARU: Mengunci posisi Badge agar presisi menempel di atas gambar */
         .video-card-thumb-wrapper {
             position: relative;
             width: 100%;
@@ -113,7 +115,7 @@
             display: block; 
         }
 
-        /* 🛠️ BADGE NEW MERAH ALA NETFLIX PREMIUM */
+        /* BADGE NEW MERAH ALA NETFLIX PREMIUM */
         .badge-new {
             position: absolute;
             top: 6px;
@@ -140,11 +142,17 @@
         .btn-pkg:active { transform: scale(0.98); }
         .btn-pkg span { font-size: 13px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; }
 
-        /* 🎨 GAYA MODAL POP-UP KASIR MULTI-METODE */
+        /* GAYA MODAL POP-UP KASIR MULTI-METODE & MODAL PROFIL */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: #fff; color: #000; width: 100%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center; position: relative; animation: fadeIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 26px; cursor: pointer; color: #888; font-weight: bold; }
         
+        /* Form Bergaya Minimalis Untuk Ganti Password */
+        .input-group { text-align: left; margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        .btn-save-pw { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
+
         /* Navigasi Pilihan Metode (Tabs) */
         .payment-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin: 15px 0 10px 0; }
         .tab-btn { flex: 1; border: none; background: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; transition: 0.2s; color: #555; }
@@ -174,7 +182,10 @@
 
     <header>
         <h2>Halo, <span id="userDisplay">...</span>! 👋</h2>
-        <button class="btn-logout" onclick="logout()">Keluar</button>
+        <div class="header-buttons">
+            <button class="btn-profile" onclick="bukaProfil()">👤 Profil</button>
+            <button class="btn-logout" onclick="logout()">Keluar</button>
+        </div>
     </header>
 
     <div id="premiumArea" style="display: none; flex-direction: column; flex: 1;">
@@ -219,6 +230,32 @@
         </div>
     </div>
 
+    <!-- 👤 POP-UP BOX PROFIL EDIT PASSWORD -->
+    <div id="modalProfil" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="tutupProfil()">&times;</span>
+            <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #000;">🔐 Pengaturan Keamanan Akun</h3>
+            
+            <div class="input-group">
+                <label>Username Anda:</label>
+                <input type="text" id="profileUsername" disabled style="background: #f1f2f6; color: #777; font-weight: bold;">
+            </div>
+
+            <div class="input-group">
+                <label>Password Lama:</label>
+                <input type="password" id="oldPassword" placeholder="Masukkan password saat ini">
+            </div>
+
+            <div class="input-group">
+                <label>Password Baru:</label>
+                <input type="password" id="newPassword" placeholder="Masukkan password baru">
+            </div>
+
+            <button class="btn-save-pw" onclick="gantiPassword()">SIMPAN PASSWORD BARU</button>
+        </div>
+    </div>
+
+    <!-- 📱 POP-UP BOX KASIR PEMBAYARAN -->
     <div id="modalBayar" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupBayar()">&times;</span>
@@ -261,6 +298,7 @@
         let metodeTerpilih = "qris";
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
+        let sisaHariUser = 0; // Mengukur sisa durasi langganan secara dinamis
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const username = sessionStorage.getItem('username');
@@ -279,12 +317,63 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > sekarang) {
+                    // Konversi sisa hari untuk menyaring konten kasta video hemat/sultan
+                    sisaHariUser = Math.ceil((tanggalMasaAktif - sekarang) / (1000 * 60 * 60 * 24));
+                    
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     loadBunnyVideos();
                 } else {
                     document.getElementById('expiredArea').style.display = 'block';
                 }
+            }
+        }
+
+        // ================= LOGIKA POP-UP PROFIL EDIT PASSWORD =================
+        function bukaProfil() {
+            document.getElementById('profileUsername').value = username;
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('modalProfil').style.display = 'flex';
+        }
+
+        function tutupProfil() {
+            document.getElementById('modalProfil').style.display = 'none';
+        }
+
+        async function gantiPassword() {
+            const oldPw = document.getElementById('oldPassword').value.trim();
+            const newPw = document.getElementById('newPassword').value.trim();
+            const token = sessionStorage.getItem('sessionToken');
+
+            if (!oldPw || !newPw) {
+                alert('Semua baris kolom input wajib diisi!');
+                return;
+            }
+
+            try {
+                // Eksekusi POST request menuju file change-password.js di folder functions/api
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user: username,
+                        token: token,
+                        oldPassword: oldPw,
+                        newPassword: newPw
+                    })
+                });
+
+                const hasil = await response.json();
+
+                if (hasil.success) {
+                    alert('Selamat! Password Anda sukses diperbarui.');
+                    tutupProfil();
+                } else {
+                    alert('Gagal ganti password: ' + hasil.message);
+                }
+            } catch (error) {
+                alert('Gagal tersambung ke sistem server: ' + error.message);
             }
         }
 
@@ -361,22 +450,31 @@
                 container.innerHTML = ''; 
                 
                 if (videos.error) throw new Error(videos.error);
-                if (videos[0] && videos[0].guid) playVideo(videos[0].guid);
+                
+                // FILTER HAK AKSES VIDEO PROFIL: Batasi muatan video jika paket pembeli hemat (<=3 Hari)
+                let videoTersaring = videos;
+                if (sisaHariUser <= 3) {
+                    videoTersaring = videos.filter(video => {
+                        const tags = video.tags ? video.tags.toLowerCase() : '';
+                        return tags.includes('hemat') || tags === ''; 
+                    });
+                }
 
-                videos.forEach(video => {
+                if (videoTersaring[0] && videoTersaring[0].guid) playVideo(videoTersaring[0].guid);
+
+                videoTersaring.forEach(video => {
                     if (!video.guid) return; 
                     const menit = Math.floor((video.length || 0) / 60);
                     const detik = (video.length || 0) % 60;
                     const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
 
-                    // 🛠️ PERBAIKAN LOGIKA UTAMA: Pengecekan Umur Video Berbasis UTC Milidetik murni (Anti-Bug Zona Waktu)
+                    // PERBAIKAN LOGIKA UTAMA: Pengecekan Umur Video Berbasis UTC Milidetik murni (Anti-Bug Zona Waktu)
                     let komponenBadgeNew = '';
                     if (video.dateCreated) {
                         const tanggalUpload = Date.parse(video.dateCreated); 
                         const tanggalSekarang = Date.now();
-                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; // Selisih waktu maksimal 3 hari
+                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; 
 
-                        // Jika umur unggahan video kurang dari 3 hari, render template badge NEW
                         if (tanggalSekarang - tanggalUpload < batasTigaHari && tanggalSekarang >= tanggalUpload) {
                             komponenBadgeNew = `<span class="badge-new">NEW</span>`;
                         }
@@ -402,6 +500,10 @@
                     `;
                     container.appendChild(card);
                 });
+
+                if (videoTersaring.length === 0) {
+                    container.innerHTML = `<p style="color: #aaa;">Belum ada koleksi video yang tersedia untuk kategori paket hemat Anda.</p>`;
+                }
             } catch (error) {
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
             }
