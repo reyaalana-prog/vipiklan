@@ -95,6 +95,7 @@
             cursor: pointer; 
             border: 1px solid #333; 
             transition: 0.2s; 
+            position: relative;
         }
         
         .video-card:active { transform: scale(0.95); } /* Efek tekan di HP */
@@ -132,6 +133,26 @@
             text-transform: uppercase;
         }
 
+        /* 💾 TOMBOL SIMPAN KECIL DI ATAS KARTU VIDEO */
+        .btn-save-video {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 11;
+            transition: 0.2s;
+        }
+        .btn-save-video.saved {
+            background: #f1c40f;
+            color: #000;
+        }
+
         .video-info { padding: 8px; text-align: center; }
         .video-meta { font-size: 11px; color: #aaa; margin: 0; }
 
@@ -144,21 +165,34 @@
 
         /* GAYA MODAL POP-UP KASIR MULTI-METODE & MODAL PROFIL */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: #fff; color: #000; width: 100%; max-width: 400px; border-radius: 15px; padding: 20px; text-align: center; position: relative; animation: fadeIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: #fff; color: #000; width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; text-align: center; position: relative; animation: fadeIn 0.3s ease; max-height: 90vh; overflow-y: auto; }
         .close-modal { position: absolute; top: 10px; right: 15px; font-size: 26px; cursor: pointer; color: #888; font-weight: bold; }
         
+        /* Navigasi Internal Menu Profil (Tabs Baru) */
+        .profile-menu-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin-bottom: 15px; }
+        .p-tab-btn { flex: 1; border: none; background: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 12px; color: #555; transition: 0.2s; }
+        .p-tab-btn.active { background: #2ecc71; color: #fff; }
+        .profile-section-content { display: none; text-align: left; }
+        .profile-section-content.active { display: block; }
+
         /* Form Bergaya Minimalis Untuk Ganti Password */
         .input-group { text-align: left; margin-bottom: 12px; }
         .input-group label { display: block; font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; }
         .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
         .btn-save-pw { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
 
-        /* Navigasi Pilihan Metode (Tabs) */
+        /* List Grid Video Saved di dalam Modal */
+        .saved-videos-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 250px; overflow-y: auto; padding-top: 5px; }
+        .saved-item-card { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; cursor: pointer; position: relative; }
+        .saved-item-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+        .saved-item-remove { position: absolute; top: 4px; right: 4px; background: rgba(239, 83, 80, 0.9); color: white; border: none; font-size: 10px; padding: 3px 6px; border-radius: 3px; cursor: pointer; }
+
+        /* Navigasi Pilihan Metode Kasir (Tabs) */
         .payment-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin: 15px 0 10px 0; }
         .tab-btn { flex: 1; border: none; background: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; transition: 0.2s; color: #555; }
         .tab-btn.active { background: #e50914; color: #fff; }
 
-        /* Konten Metode */
+        /* Konten Metode Kasir */
         .method-content { display: none; }
         .method-content.active { display: block; }
 
@@ -230,32 +264,40 @@
         </div>
     </div>
 
-    <!-- 👤 POP-UP BOX PROFIL EDIT PASSWORD -->
     <div id="modalProfil" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupProfil()">&times;</span>
-            <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #000;">🔐 Pengaturan Keamanan Akun</h3>
             
-            <div class="input-group">
-                <label>Username Anda:</label>
-                <input type="text" id="profileUsername" disabled style="background: #f1f2f6; color: #777; font-weight: bold;">
+            <div class="profile-menu-tabs">
+                <button id="pTabVideo" class="p-tab-btn active" onclick="gantiMenuProfil('video')">💾 Video Tersimpan</button>
+                <button id="pTabSandi" class="p-tab-btn" onclick="gantiMenuProfil('sandi')">🔐 Ganti Password</button>
+            </div>
+            
+            <div id="profilKontenVideo" class="profile-section-content active">
+                <h4 style="margin: 0 0 10px 0; color: #333;">Daftar Tonton Nanti:</h4>
+                <div id="savedVideosList" class="saved-videos-container">
+                    </div>
             </div>
 
-            <div class="input-group">
-                <label>Password Lama:</label>
-                <input type="password" id="oldPassword" placeholder="Masukkan password saat ini">
+            <div id="profilKontenSandi" class="profile-section-content">
+                <h4 style="margin: 0 0 15px 0; color: #333;">Pengaturan Kata Sandi</h4>
+                <div class="input-group">
+                    <label>Username Anda:</label>
+                    <input type="text" id="profileUsername" disabled style="background: #f1f2f6; color: #777; font-weight: bold;">
+                </div>
+                <div class="input-group">
+                    <label>Password Lama:</label>
+                    <input type="password" id="oldPassword" placeholder="Masukkan password saat ini">
+                </div>
+                <div class="input-group">
+                    <label>Password Baru:</label>
+                    <input type="password" id="newPassword" placeholder="Masukkan password baru">
+                </div>
+                <button class="btn-save-pw" onclick="gantiPassword()">SIMPAN PASSWORD BARU</button>
             </div>
-
-            <div class="input-group">
-                <label>Password Baru:</label>
-                <input type="password" id="newPassword" placeholder="Masukkan password baru">
-            </div>
-
-            <button class="btn-save-pw" onclick="gantiPassword()">SIMPAN PASSWORD BARU</button>
         </div>
     </div>
 
-    <!-- 📱 POP-UP BOX KASIR PEMBAYARAN -->
     <div id="modalBayar" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="tutupBayar()">&times;</span>
@@ -298,7 +340,8 @@
         let metodeTerpilih = "qris";
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
-        let sisaHariUser = 0; // Mengukur sisa durasi langganan secara dinamis
+        let sisaHariUser = 0; 
+        let databaseVideosGlobal = []; // Menyimpan master data video global untuk pencarian data bookmark
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const username = sessionStorage.getItem('username');
@@ -317,9 +360,7 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > sekarang) {
-                    // Konversi sisa hari untuk menyaring konten kasta video hemat/sultan
                     sisaHariUser = Math.ceil((tanggalMasaAktif - sekarang) / (1000 * 60 * 60 * 24));
-                    
                     document.getElementById('premiumArea').style.display = 'flex';
                     document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
                     loadBunnyVideos();
@@ -329,16 +370,37 @@
             }
         }
 
-        // ================= LOGIKA POP-UP PROFIL EDIT PASSWORD =================
+        // ================= LOGIKA POP-UP MENU PROFIL (TABS BARU) =================
         function bukaProfil() {
             document.getElementById('profileUsername').value = username;
             document.getElementById('oldPassword').value = '';
             document.getElementById('newPassword').value = '';
+            gantiMenuProfil('video'); // Default buka video tersimpan duluan
             document.getElementById('modalProfil').style.display = 'flex';
         }
 
         function tutupProfil() {
             document.getElementById('modalProfil').style.display = 'none';
+        }
+
+        function gantiMenuProfil(menu) {
+            const tabVideo = document.getElementById('pTabVideo');
+            const tabSandi = document.getElementById('pTabSandi');
+            const kontenVideo = document.getElementById('profilKontenVideo');
+            const kontenSandi = document.getElementById('profilKontenSandi');
+
+            if (menu === 'video') {
+                tabVideo.classList.add('active');
+                tabSandi.classList.remove('active');
+                kontenVideo.classList.add('active');
+                kontenSandi.classList.remove('active');
+                renderSavedVideosArea(); // Render ulang list tontonan pas dibuka
+            } else {
+                tabSandi.classList.add('active');
+                tabVideo.classList.remove('active');
+                kontenSandi.classList.add('active');
+                kontenVideo.classList.remove('active');
+            }
         }
 
         async function gantiPassword() {
@@ -352,7 +414,6 @@
             }
 
             try {
-                // Eksekusi POST request menuju file change-password.js di folder functions/api
                 const response = await fetch('/api/change-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -365,7 +426,6 @@
                 });
 
                 const hasil = await response.json();
-
                 if (hasil.success) {
                     alert('Selamat! Password Anda sukses diperbarui.');
                     tutupProfil();
@@ -375,6 +435,78 @@
             } catch (error) {
                 alert('Gagal tersambung ke sistem server: ' + error.message);
             }
+        }
+
+        // ================= LOGIKA UTAMA FITUR SIMPAN VIDEO (LOCALSTORAGE) =================
+        function ambilDaftarSimpan() {
+            // Mengunci key penyimpanan unik per masing-masing username agar tidak tertukar akun
+            const keyPenyimpanan = `saved_videos_${username}`;
+            const dataMentah = localStorage.getItem(keyPenyimpanan);
+            return dataMentah ? JSON.parse(dataMentah) : [];
+        }
+
+        function toggleSimpanVideo(e, guid, thumbName) {
+            e.stopPropagation(); // Mencegah video terputar otomatis saat menekan tombol simpan
+            const keyPenyimpanan = `saved_videos_${username}`;
+            let listSimpan = ambilDaftarSimpan();
+
+            const index = listSimpan.findIndex(item => item.guid === guid);
+
+            if (index > -1) {
+                // Jika sudah ada, berarti user berniat menghapus dari daftar simpan
+                listSimpan.splice(index, 1);
+                e.target.classList.remove('saved');
+                e.target.innerText = "💾 Simpan";
+            } else {
+                // Jika belum ada, masukkan data objek baru ke dalam array
+                listSimpan.push({ guid: guid, thumbnailFileName: thumbName });
+                e.target.classList.add('saved');
+                e.target.innerText = "⭐ Tersimpan";
+            }
+
+            localStorage.setItem(keyPenyimpanan, JSON.stringify(listSimpan));
+        }
+
+        function hapusDariMenuProfil(e, guid) {
+            e.stopPropagation();
+            const keyPenyimpanan = `saved_videos_${username}`;
+            let listSimpan = ambilDaftarSimpan();
+            
+            listSimpan = listSimpan.filter(item => item.guid !== guid);
+            localStorage.setItem(keyPenyimpanan, JSON.stringify(listSimpan));
+            
+            // Render ulang isi menu & perbarui tombol di halaman utama biar sinkron murni
+            renderSavedVideosArea();
+            loadBunnyVideosDariCache(); 
+        }
+
+        function renderSavedVideosArea() {
+            const containerBox = document.getElementById('savedVideosList');
+            containerBox.innerHTML = '';
+            const listSimpan = ambilDaftarSimpan();
+
+            if (listSimpan.length === 0) {
+                containerBox.innerHTML = `<p style="color: #666; font-size: 13px; grid-column: span 2; text-align:center; margin: 20px 0;">Belum ada video yang kamu simpan.</p>`;
+                return;
+            }
+
+            listSimpan.forEach(item => {
+                const cardItem = document.createElement('div');
+                cardItem.className = 'saved-item-card';
+                
+                cardItem.onclick = () => {
+                    playVideo(item.guid);
+                    tutupProfil();
+                };
+
+                const urlThumb = `https://vz-99c5be47-12d.b-cdn.net/${item.guid}/${item.thumbnailFileName}`;
+
+                cardItem.innerHTML = `
+                    <img class="saved-item-thumb" src="${urlThumb}" onerror="this.src='https://via.placeholder.com/160x90/222/fff?text=No+Thumb'">
+                    <button class="saved-item-remove" onclick="hapusDariMenuProfil(event, '${item.guid}')">❌ Hapus</button>
+                `;
+                containerBox.appendChild(cardItem);
+            });
         }
 
         // ================= LOGIKA INTERAKSI POP-UP KASIR =================
@@ -392,7 +524,6 @@
 
         function gantiMetode(metode) {
             metodeTerpilih = metode;
-            
             const tabQris = document.getElementById('tabQris');
             const tabDana = document.getElementById('tabDana');
             const kontenQris = document.getElementById('kontenQris');
@@ -415,7 +546,6 @@
         function updateLinkWhatsApp() {
             const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
             const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${detailHariGlobal} Hari sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
-            
             document.getElementById('btnWA').href = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
         }
 
@@ -436,7 +566,6 @@
         async function loadBunnyVideos() {
             try {
                 const token = sessionStorage.getItem('sessionToken'); 
-                
                 const response = await fetch(`/api/get-videos?user=${username}&token=${token}`);
                 const videos = await response.json();
                 
@@ -446,67 +575,81 @@
                     return;
                 }
 
-                const container = document.getElementById('videoList');
-                container.innerHTML = ''; 
-                
                 if (videos.error) throw new Error(videos.error);
                 
-                // FILTER HAK AKSES VIDEO PROFIL: Batasi muatan video jika paket pembeli hemat (<=3 Hari)
-                let videoTersaring = videos;
-                if (sisaHariUser <= 3) {
-                    videoTersaring = videos.filter(video => {
-                        const tags = video.tags ? video.tags.toLowerCase() : '';
-                        return tags.includes('hemat') || tags === ''; 
-                    });
-                }
+                databaseVideosGlobal = videos; // Daftarkan data ke global variabel
+                loadBunnyVideosDariCache(); // Panggil fungsi perakit DOM komponen kartu
 
-                if (videoTersaring[0] && videoTersaring[0].guid) playVideo(videoTersaring[0].guid);
-
-                videoTersaring.forEach(video => {
-                    if (!video.guid) return; 
-                    const menit = Math.floor((video.length || 0) / 60);
-                    const detik = (video.length || 0) % 60;
-                    const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-
-                    // PERBAIKAN LOGIKA UTAMA: Pengecekan Umur Video Berbasis UTC Milidetik murni (Anti-Bug Zona Waktu)
-                    let komponenBadgeNew = '';
-                    if (video.dateCreated) {
-                        const tanggalUpload = Date.parse(video.dateCreated); 
-                        const tanggalSekarang = Date.now();
-                        const batasTigaHari = 3 * 24 * 60 * 60 * 1000; 
-
-                        if (tanggalSekarang - tanggalUpload < batasTigaHari && tanggalSekarang >= tanggalUpload) {
-                            komponenBadgeNew = `<span class="badge-new">NEW</span>`;
-                        }
-                    }
-
-                    const card = document.createElement('div');
-                    card.className = 'video-card';
-                    
-                    card.onclick = () => {
-                        playVideo(video.guid);
-                    };
-                    
-                    const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
-
-                    card.innerHTML = `
-                        <div class="video-card-thumb-wrapper">
-                            ${komponenBadgeNew}
-                            <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
-                        </div>
-                        <div class="video-info">
-                            <p class="video-meta">⏱️ ${durasi}</p>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-
-                if (videoTersaring.length === 0) {
-                    container.innerHTML = `<p style="color: #aaa;">Belum ada koleksi video yang tersedia untuk kategori paket hemat Anda.</p>`;
-                }
             } catch (error) {
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
             }
+        }
+
+        function loadBunnyVideosDariCache() {
+            const container = document.getElementById('videoList');
+            container.innerHTML = ''; 
+            
+            let videoTersaring = databaseVideosGlobal;
+            if (sisaHariUser <= 3) {
+                videoTersaring = databaseVideosGlobal.filter(video => {
+                    const tags = video.tags ? video.tags.toLowerCase() : '';
+                    return tags.includes('hemat') || tags === ''; 
+                });
+            }
+
+            if (videoTersaring.length === 0) {
+                container.innerHTML = `<p style="color: #aaa;">Belum ada koleksi video yang tersedia untuk kategori paket hemat Anda.</p>`;
+                return;
+            }
+
+            // Putar video indeks pertama otomatis di awal hanya jika player masih kosong
+            const player = document.getElementById('bunnyPlayer');
+            if ((player.src === window.location.href || player.src === "") && videoTersaring[0] && videoTersaring[0].guid) {
+                playVideo(videoTersaring[0].guid);
+            }
+
+            const listSimpan = ambilDaftarSimpan();
+
+            videoTersaring.forEach(video => {
+                if (!video.guid) return; 
+                const menit = Math.floor((video.length || 0) / 60);
+                const detik = (video.length || 0) % 60;
+                const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
+
+                let komponenBadgeNew = '';
+                if (video.dateCreated) {
+                    const tanggalUpload = Date.parse(video.dateCreated); 
+                    const tanggalSekarang = Date.now();
+                    const batasTigaHari = 3 * 24 * 60 * 60 * 1000; 
+
+                    if (tanggalSekarang - tanggalUpload < batasTigaHari && tanggalSekarang >= tanggalUpload) {
+                        komponenBadgeNew = `<span class="badge-new">NEW</span>`;
+                    }
+                }
+
+                // Cek status apakah video ini ada di dalam list bookmark localstorage
+                const sudahDisimpan = listSimpan.some(item => item.guid === video.guid);
+                const teksTombol = sudahDisimpan ? "⭐ Tersimpan" : "💾 Simpan";
+                const kelasTombol = sudahDisimpan ? "btn-save-video saved" : "btn-save-video";
+
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.onclick = () => playVideo(video.guid);
+                
+                const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
+
+                card.innerHTML = `
+                    <div class="video-card-thumb-wrapper">
+                        ${komponenBadgeNew}
+                        <button class="${kelasTombol}" onclick="toggleSimpanVideo(event, '${video.guid}', '${video.thumbnailFileName}')">${teksTombol}</button>
+                        <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
+                    </div>
+                    <div class="video-info">
+                        <p class="video-meta">⏱️ ${durasi}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
         function playVideo(videoId) {
