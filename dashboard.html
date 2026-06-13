@@ -60,6 +60,7 @@
             padding: 10px;
             text-align: center;
             color: #ccc;
+            transition: color 0.2s ease;
         }
 
         /* 4. AREA KATALOG (BISA DI-SCROLL) */
@@ -337,7 +338,8 @@
                 <iframe id="bunnyPlayer" src="" 
                         style="border:0;position:absolute;top:0;left:0;height:100%;width:100%;" 
                         allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;" 
-                        allowfullscreen="true">
+                        allowfullscreen="true"
+                        onload="videoSelesaiMemuat()">
                 </iframe>
             </div>
             <p id="playingTitle">Selamat menonton 🍿</p>
@@ -468,7 +470,7 @@
             
             <div id="kontenQris" class="method-content active">
                 <p style="font-size: 12px; color: #666; margin: 5px 0;">Scan QRIS di bawah menggunakan Dana, OVO, GoPay, atau LinkAja</p>
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhrbb0v4NESqsTLGft7Qi24p9T7NTc759i7WD4tQoUb9quuz2wrHfI9NVsl3mXOG9I2FKhBgwITE9S5Mmj1kTRWZMO8yQE66opTWs8Gx_MkJLf137mo3_emk_7ahkIIZXG0mcKvmrYnKIr_b8Fc4l815tnO8p2u4qyj1NBeWa0QtukmtCXwk6zPsGg_hfQ/s825/photo_2026-06-11_20-45-17.jpg" class="qris-img" alt="QRIS Merchant">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhrbb0v4NESqsTLGft7Qi24p9T7NTc759i7WD4tQoUb9quuz2wrHfI9NVsl3mXOG9I2FKhBgwITE9S5Mmj1kTRWZMO8yQE66opTWs8Gx_MkJLf137mo3_emk_7ahkIIZXG0mcKvmrYnKIr_b8Fc4l815tnO8p2u4qyj1NBeWa0QtukmtCXwk6zPsGg_hfQ/_s825/photo_2026-06-11_20-45-17.jpg" class="qris-img" alt="QRIS Merchant">
             </div>
 
             <div id="kontenDana" class="method-content">
@@ -505,8 +507,8 @@
         let halamanAktifGlobal = 1;
         const ITEM_PER_PAGE = 25;
 
-        // 🛠| ID FOLDER COLLECTION DARI IMAGE_EF4EB4.JPG
-        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
+        // 🛠️ ID FOLDER COLLECTION
+        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0549a1f4020";
         const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -542,7 +544,7 @@
             const semuaTombol = document.querySelectorAll('.btn-cat-filter');
             semuaTombol.forEach(btn => btn.classList.remove('active'));
             document.getElementById(`cat-${namaKategori}`).classList.add('active');
-            jalankanFilterKatalog(true); // Reset ke halaman 1 jika ganti kategori
+            jalankanFilterKatalog(true); 
         }
 
         function jalankanFilterKatalog(resetKeHalamanSatu = false) {
@@ -556,7 +558,15 @@
 
             let videoTersaring = databaseVideosGlobal;
 
-            // 1. FILTER TOMBOL KATEGORI: Saring berbasis ID folder Hijab & Pelajar saja
+            // 1. FILTER LOCK UTAMA: Paket hemat (sisa hari <= 3) mengunci katalog otomatis membaca kata "hemat" di tag
+            if (sisaHariUser <= 3) {
+                videoTersaring = databaseVideosGlobal.filter(video => {
+                    const tags = video.tags ? video.tags.toLowerCase() : '';
+                    return tags.includes('hemat') || tags === ''; 
+                });
+            }
+
+            // 2. FILTER TOMBOL KATEGORI: Saring berbasis ID folder Hijab & Pelajar saja
             if (kategoriAktifGlobal !== 'semua') {
                 videoTersaring = videoTersaring.filter(video => {
                     const idFolderVideo = String(video.collectionId);
@@ -566,7 +576,7 @@
                 });
             }
 
-            // 2. FILTER SEARCH TEXT: Saring real-time ketikan kata kunci judul
+            // 3. FILTER SEARCH TEXT: Saring real-time ketikan kata kunci judul
             if (kataKunciSari !== '') {
                 videoTersaring = videoTersaring.filter(video => {
                     const judulKecil = (video.title || '').toLowerCase();
@@ -629,7 +639,6 @@
                 container.appendChild(card);
             });
 
-            // RENDER TOMBOL PAGINATION DI BAWAH KATALOG
             buatTombolNavigasiHalaman(totalHalaman);
         }
 
@@ -637,9 +646,8 @@
             const areaPaginasi = document.getElementById('paginationArea');
             areaPaginasi.innerHTML = '';
 
-            if (totalHalaman <= 1) return; // Jika cuma 1 halaman, sembunyikan navigasi
+            if (totalHalaman <= 1) return;
 
-            // Tombol Back (Sebelumnya)
             const btnPrev = document.createElement('button');
             btnPrev.className = 'btn-page-nav';
             btnPrev.innerText = '⬅️ Prev';
@@ -647,7 +655,6 @@
             btnPrev.onclick = () => { halamanAktifGlobal--; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
             areaPaginasi.appendChild(btnPrev);
 
-            // Daftar Angka Halaman
             for (let i = 1; i <= totalHalaman; i++) {
                 const btnNum = document.createElement('button');
                 btnNum.className = i === halamanAktifGlobal ? 'btn-page-number active' : 'btn-page-number';
@@ -656,7 +663,6 @@
                 areaPaginasi.appendChild(btnNum);
             }
 
-            // Tombol Next (Berikutnya)
             const btnNext = document.createElement('button');
             btnNext.className = 'btn-page-nav';
             btnNext.innerText = 'Next ➡️';
@@ -697,10 +703,24 @@
             }
         }
 
+        // ⚡ INSTANT RESPONSE EVENT: Mengubah teks status pemutar menjadi memuat data saat di-klik
         function playVideo(videoId) {
-            document.getElementById('playingTitle').innerText = "Selamat menonton 🍿";
+            const titleBox = document.getElementById('playingTitle');
+            titleBox.style.color = '#f1c40f'; // Efek estetik warna kuning pas memuat
+            titleBox.innerText = "⏳ Sedang memuat video premium..."; 
+            
             const player = document.getElementById('bunnyPlayer');
             player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
+        }
+
+        // ⚡ IFRAME LOADED MONITOR: Mengembalikan teks pemutar normal setelah data video siap
+        function videoSelesaiMemuat() {
+            const titleBox = document.getElementById('playingTitle');
+            const player = document.getElementById('bunnyPlayer');
+            if (player.src !== window.location.href && player.src !== "") {
+                titleBox.style.color = '#ccc'; 
+                titleBox.innerText = "Selamat menonton 🍿";
+            }
         }
 
         // ================= MODAL PROFILE CONTROLLERS =================
@@ -788,6 +808,13 @@
             jalankanFilterKatalog();
         }
 
+        document.addEventListener("DOMContentLoaded", () => {
+            const playerIframe = document.getElementById('bunnyPlayer');
+            if (playerIframe && playerIframe.complete) {
+                videoSelesaiMemuat();
+            }
+        });
+
         function renderSavedVideosArea() {
             const box = document.getElementById('savedVideosList'); box.innerHTML = '';
             const list = ambilDaftarSimpan();
@@ -812,12 +839,13 @@
             document.getElementById('modalBayar').style.display = 'flex';
         }
 
+        // Ganti Metode Bayar (QRIS / DANA)
         function gantiMetode(metode) {
             metodeTerpilih = metode;
             const tQris = document.getElementById('tabQris'); const tDana = document.getElementById('tabDana');
             const kQris = document.getElementById('kontenQris'); const kDana = document.getElementById('kontenDana');
             if (metode === 'qris') { tQris.classList.add('active'); tDana.classList.remove('active'); kQris.classList.add('active'); kDana.classList.remove('active'); }
-            else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kQris.classList.remove('active'); }
+            else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kDana.classList.remove('active'); }
             updateLinkWhatsApp();
         }
 
