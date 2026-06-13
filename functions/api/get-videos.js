@@ -69,7 +69,8 @@ export async function onRequestGet(context) {
       status: 200,
       headers: { 
         "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
+        // ⚡ BERHASIL DIOPTIMALKAN: Simpan cache di edge CDN Cloudflare selama 5 menit (300 detik) agar muat awal dashboard instan!
+        "Cache-Control": "public, max-age=300, s-maxage=300",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET"
       }
