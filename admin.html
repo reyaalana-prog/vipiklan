@@ -13,7 +13,6 @@
         input[type="password"], input[type="number"], input[type="text"] { background: #333; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; font-size: 14px; text-align: center; }
         input[type="password"] { width: 80%; max-width: 300px; margin-bottom: 10px; font-size: 16px; }
         
-        /* 🛠️ CSS BARU: KOTAK INPUT PENCARIAN USER */
         .search-box {
             width: 100%;
             max-width: 300px;
@@ -33,7 +32,6 @@
         .stat-green { color: #2ecc71; }
         .stat-gold { color: #f1c40f; }
         
-        /* BOX PENGATURAN HARGA */
         .price-settings-box { background: #222; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 25px; text-align: left; }
         .price-row { display: flex; gap: 15px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
         .price-input-group { display: flex; align-items: center; gap: 5px; }
@@ -132,7 +130,7 @@
     <script>
         let SEED_PIN = localStorage.getItem('admin_session_pin') || '';
         let HARGA_PAKET = { 3: 5000, 10: 15000, 30: 30000 }; 
-        let DATA_USER_GLOBAL = []; // 🛠️ Menampung master data user asli dari database
+        let DATA_USER_GLOBAL = []; 
 
         if (SEED_PIN) tampilkanDashboardAdmin();
 
@@ -162,12 +160,8 @@
                     });
                 }
 
-                // 🛠️ Amankan data user asli ke variabel penampung global
                 DATA_USER_GLOBAL = data.users || [];
-                
-                // Bersihkan text pencarian setiap kali admin memuat/merefresh dashboard
                 document.getElementById('userSearchInput').value = '';
-                
                 renderDashboard(DATA_USER_GLOBAL, data.serverTime);
 
             } catch (error) {
@@ -176,16 +170,11 @@
             }
         }
 
-        // 🛠️ FUNGSI BARU: MENYARING DATA SECARA LIVE SAAT INPUT KETIKAN BERUBAH
         function jalankanPencarian() {
             const kataKunci = document.getElementById('userSearchInput').value.toLowerCase().trim();
-            
-            // Filter array global tanpa merusak data asli database di browser
             const hasilSaringan = DATA_USER_GLOBAL.filter(user => {
                 return user.username.toLowerCase().includes(kataKunci);
             });
-            
-            // Render ulang isi baris tabel sesuai keyword (gunakan serverTime statis saat ini)
             renderDashboard(hasilSaringan, Date.now(), true);
         }
 
@@ -193,7 +182,6 @@
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
 
-            // Update statistik box atas hanya di awal muat, bukan saat mengetik search bar
             if (!isSearching) {
                 let totalPendaftar = DATA_USER_GLOBAL.length;
                 document.getElementById('totalUsers').innerText = totalPendaftar;
@@ -236,7 +224,7 @@
                         <button class="btn" style="background:#27ae60;" onclick="perpanjangUser('${user.username}', 3)">+3H</button>
                         <button class="btn" style="background:#2980b9;" onclick="perpanjangUser('${user.username}', 10)">+10H</button>
                         <button class="btn" style="background:#e50914;" onclick="perpanjangUser('${user.username}', 30)">+30H</button>
-                        <button class="btn btn-secondary" onclick="perpanjangUser('${user.username}', 0)" style="background:#c0392b;">Reset</button>
+                        <button class="btn btn-secondary" onclick="resetUserAkses('${user.username}')" style="background:#c0392b;">Reset</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -263,28 +251,48 @@
             }
         }
 
+        // 🔥 BERHASIL DISINKRONKAN: Fungsi perpanjang user murni mengirimkan parameter payload days_to_add ke backend
         async function perpanjangUser(username, jumlahHari) {
-            let targetTanggalStr = "expired";
-            if (jumlahHari > 0) {
-                const tgl = new Date();
-                tgl.setDate(tgl.getDate() + jumlahHari);
-                const yyyy = tgl.getFullYear();
-                const mm = String(tgl.getMonth() + 1).padStart(2, '0');
-                const dd = String(tgl.getDate()).padStart(2, '0');
-                targetTanggalStr = `${yyyy}-${mm}-${dd} 23:59:59`;
-            }
-
-            if (!confirm(`Ubah masa aktif user [ ${username} ] sebanyak +${jumlahHari} Hari?`)) return;
+            if (!confirm(`Tambah masa aktif premium user [ ${username} ] sebanyak +${jumlahHari} Hari (Akumulasi Aktif)?`)) return;
 
             try {
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
-                    body: JSON.stringify({ action: "update_user", username, new_sub_until: targetTanggalStr })
+                    body: JSON.stringify({ 
+                        action: "update_user", 
+                        username: username, 
+                        days_to_add: jumlahHari 
+                    })
                 });
 
                 if (!response.ok) throw new Error('Gagal memperbarui database.');
-                alert('Berhasil diupdate!');
+                const res = await response.json();
+                alert(res.message);
+                tampilkanDashboardAdmin();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // 🔥 FITUR BARU PENUNJANG: Fungsi tombol reset untuk langsung memaksa status user menjadi expired detik ini
+        async function resetUserAkses(username) {
+            if (!confirm(`Apakah Anda yakin ingin me-RESET masa aktif [ ${username} ] menjadi EXPIRED sekarang?`)) return;
+
+            try {
+                const response = await fetch('/api/admin-manage', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
+                    // Mengirimkan instruksi days_to_add minus ekstrim agar backend otomatis memotong basis tanggal ke waktu lampau/habis
+                    body: JSON.stringify({ 
+                        action: "update_user", 
+                        username: username, 
+                        days_to_add: -999 
+                    })
+                });
+
+                if (!response.ok) throw new Error('Gagal memproses reset di database.');
+                alert(`Akses premium [ ${username} ] berhasil di-reset menjadi EXPIRED!`);
                 tampilkanDashboardAdmin();
             } catch (error) {
                 alert(error.message);
