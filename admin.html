@@ -213,7 +213,16 @@
                     badgeClass = "status-active";
                 }
 
-                const tampilTanggal = user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set';
+                // ⚡ BARU: Interseptor teks badge status jika user terdaftar permanen tahun 2099
+                if (user.subUntil && user.subUntil.includes("2099")) {
+                    statusText = "💎 PERMANEN";
+                    badgeClass = "status-active";
+                }
+
+                // ⚡ BARU: Modifikasi teks cetak tanggal kadaluwarsa kolom tabel khusus permanen
+                const tampilTanggal = user.subUntil && user.subUntil.includes("2099")
+                    ? "💎 AKTIF SELAMANYA"
+                    : (user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set');
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -224,6 +233,7 @@
                         <button class="btn" style="background:#27ae60;" onclick="perpanjangUser('${user.username}', 3)">+3H</button>
                         <button class="btn" style="background:#2980b9;" onclick="perpanjangUser('${user.username}', 10)">+10H</button>
                         <button class="btn" style="background:#e50914;" onclick="perpanjangUser('${user.username}', 30)">+30H</button>
+                        <button class="btn" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);" onclick="perpanjangUser('${user.username}', 9999)">💎 Perm</button>
                         <button class="btn btn-secondary" onclick="resetUserAkses('${user.username}')" style="background:#c0392b;">Reset</button>
                     </td>
                 `;
@@ -251,9 +261,12 @@
             }
         }
 
-        // 🔥 BERHASIL DISINKRONKAN: Fungsi perpanjang user murni mengirimkan parameter payload days_to_add ke backend
         async function perpanjangUser(username, jumlahHari) {
-            if (!confirm(`Tambah masa aktif premium user [ ${username} ] sebanyak +${jumlahHari} Hari (Akumulasi Aktif)?`)) return;
+            const konfirmasiTeks = jumlahHari === 9999 
+                ? `Ubah akun [ ${username} ] menjadi AKTIF PERMANEN SELAMANYA?`
+                : `Tambah masa aktif premium user [ ${username} ] sebanyak +${jumlahHari} Hari (Akumulasi Aktif)?`;
+
+            if (!confirm(konfirmasiTeks)) return;
 
             try {
                 const response = await fetch('/api/admin-manage', {
@@ -275,7 +288,6 @@
             }
         }
 
-        // 🔥 FITUR BARU PENUNJANG: Fungsi tombol reset untuk langsung memaksa status user menjadi expired detik ini
         async function resetUserAkses(username) {
             if (!confirm(`Apakah Anda yakin ingin me-RESET masa aktif [ ${username} ] menjadi EXPIRED sekarang?`)) return;
 
@@ -283,7 +295,6 @@
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
-                    // Mengirimkan instruksi days_to_add minus ekstrim agar backend otomatis memotong basis tanggal ke waktu lampau/habis
                     body: JSON.stringify({ 
                         action: "update_user", 
                         username: username, 
