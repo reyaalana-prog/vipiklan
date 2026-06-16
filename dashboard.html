@@ -358,6 +358,9 @@
                 <button class="btn-pkg" onclick="bukaBayar(30, 30000)">
                     👑 Paket Sultan (30 Hari) <span>Rp 30.000</span>
                 </button>
+                <button class="btn-pkg" style="background: linear-gradient(135deg, #e50914, #f1c40f); color: white;" onclick="bukaBayar(9999, 130000)">
+                    💎 Paket Permanen (Selamanya) <span>Rp 130.000</span>
+                </button>
             </div>
         </div>
     </div>
@@ -402,6 +405,9 @@
                         </button>
                         <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(30, 30000)">
                             👑 Paket Sultan (30 Hari) <span style="font-size:11px;">Rp 30.000</span>
+                        </button>
+                        <button class="btn-pkg" style="padding: 10px; font-size: 12px; background: linear-gradient(135deg, #e50914, #f1c40f);" onclick="eksekusiPerpanjang(9999, 130000)">
+                            💎 Paket Permanen (Selamanya) <span style="font-size:11px;">Rp 130.000</span>
                         </button>
                     </div>
                 </div>
@@ -481,7 +487,7 @@
         const ITEM_PER_PAGE = 25;
 
         // 🛠️ ID FOLDER COLLECTION
-        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
+        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0549a1f4020";
         const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
 
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
@@ -501,9 +507,20 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > aerospaceTime) {
-                    sisaHariUser = Math.ceil((tanggalMasaAktif - aerospaceTime) / (1000 * 60 * 60 * 24));
+                    // ⚡ BARU: Jika user adalah pemilik akun permanen (tahun 2099), bypass hitungan sisa hari agar tidak terkunci sisa paket hemat
+                    if (subUntil.includes("2099")) {
+                        sisaHariUser = 9999;
+                    } else {
+                        sisaHariUser = Math.ceil((tanggalMasaAktif - aerospaceTime) / (1000 * 60 * 60 * 24));
+                    }
                     document.getElementById('premiumArea').style.display = 'flex';
-                    document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
+                    
+                    // ⚡ BARU: Cetak teks tanggal dinamis khusus permanen di dashboard atas
+                    if (subUntil.includes("2099")) {
+                        document.getElementById('dateDisplay').innerText = "💎 AKTIF SELAMANYA";
+                    } else {
+                        document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
+                    }
                     loadBunnyVideos();
                 } else {
                     document.getElementById('expiredArea').style.display = 'block';
@@ -688,9 +705,15 @@
             document.getElementById('newPassword').value = '';
             document.getElementById('memberUsername').innerText = username;
             const formatTanggalDb = subUntil ? subUntil.replace(" ", "T") : '';
-            document.getElementById('memberExpiry').innerText = subUntil && subUntil !== 'expired' && subUntil !== 'null'
-                ? new Date(formatTanggalDb).toLocaleString('id-ID')
-                : "Sudah Habis Masa Aktif";
+            
+            // ⚡ BARU: Interseptor logika penampil teks di lembar member card akun permanen
+            if (subUntil && subUntil.includes("2099")) {
+                document.getElementById('memberExpiry').innerText = "💎 PERMANEN / AKTIF SELAMANYA";
+            } else {
+                document.getElementById('memberExpiry').innerText = subUntil && subUntil !== 'expired' && subUntil !== 'null'
+                    ? new Date(formatTanggalDb).toLocaleString('id-ID')
+                    : "Sudah Habis Masa Aktif";
+            }
 
             document.getElementById('pilihanPaketPerpanjang').style.display = 'none';
             document.getElementById('btnKlikPerpanjang').style.display = 'block';
@@ -766,13 +789,6 @@
             jalankanFilterKatalog();
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const playerIframe = document.getElementById('bunnyPlayer');
-            if (playerIframe && playerIframe.complete) {
-                videoSelesaiMemuat();
-            }
-        });
-
         function renderSavedVideosArea() {
             const box = document.getElementById('savedVideosList'); box.innerHTML = '';
             const list = ambilDaftarSimpan();
@@ -802,14 +818,15 @@
             const tQris = document.getElementById('tabQris'); const tDana = document.getElementById('tabDana');
             const kQris = document.getElementById('kontenQris'); const kDana = document.getElementById('kontenDana');
             if (metode === 'qris') { tQris.classList.add('active'); tDana.classList.remove('active'); kQris.classList.add('active'); kDana.classList.remove('active'); }
-            // ⚡ BERHASIL DIPERBAIKI: Mengembalikan fungsi target kontens penutup DANA (bukan kQuick)
             else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kQris.classList.remove('active'); }
             updateLinkWhatsApp();
         }
 
         function updateLinkWhatsApp() {
             const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
-            const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${detailHariGlobal} Hari sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
+            // ⚡ BARU: Logika penata string pesan WhatsApp khusus jika mendeteksi ID hari permanen (9999)
+            const durasiTeks = detailHariGlobal === 9999 ? "Permanen (Selamanya)" : `${detailHariGlobal} Hari`;
+            const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${durasiTeks} sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
             document.getElementById('btnWA').href = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
         }
 
