@@ -292,10 +292,10 @@
 
         .price-box { background: #f8f9fa; border: 2px dashed #e50914; padding: 12px; border-radius: 10px; margin: 12px 0; }
         .price-box h1 { margin: 0; color: #e50914; font-size: 26px; font-family: monospace; }
-        .btn-wa { background: #25d366; color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; text-decoration: none; display: block; box-sizing: border-box; text-align: center; }
-
-        #pilihanPaketPerpanjang { margin-top: 15px; display: none; }
-        .judul-perpanjang { font-size: 13px; color: #333; margin: 10px 0; font-weight: bold; text-align: left; }
+        
+        /* 📱 DESIGN TOMBOL TELEGRAM BARU */
+        .btn-wa { background: #24a1de; color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; text-decoration: none; display: block; box-sizing: border-box; text-align: center; border: 1px solid #2093ce; transition: 0.2s; }
+        .btn-wa:active { transform: scale(0.98); background: #1d8ec2; }
     </style>
 </head>
 <body>
@@ -468,13 +468,14 @@
                 <p style="font-size: 10px; color: #e67e22; margin: 5px 0 0 0; font-weight: bold;">*Wajib transfer tepat sampai digit terakhir agar cepat dicek admin</p>
             </div>
 
-            <a id="btnWA" href="#" target="_blank" class="btn-wa">SAYA SUDAH TRANSFER</a>
+            <a id="btnWA" href="#" target="_blank" class="btn-wa">SAYA SUDAH TRANSFER (VIA TELEGRAM)</a>
         </div>
     </div>
 
     <script>
         const LIBRARY_ID = "680881"; 
-        const WA_ADMIN = "6283138319827"; 
+        // ⚡ BERHASIL DISINKRONKAN: Konfigurasi target utama dialihkan murni ke username Telegram kamu
+        const TELE_ADMIN = "Keylia12"; 
         let metodeTerpilih = "qris";
         let detailHariGlobal = 0;
         let hargaFinalGlobal = 0;
@@ -507,7 +508,6 @@
                 const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
                 
                 if (tanggalMasaAktif > aerospaceTime) {
-                    // ⚡ BARU: Jika user adalah pemilik akun permanen (tahun 2099), bypass hitungan sisa hari agar tidak terkunci sisa paket hemat
                     if (subUntil.includes("2099")) {
                         sisaHariUser = 9999;
                     } else {
@@ -515,7 +515,6 @@
                     }
                     document.getElementById('premiumArea').style.display = 'flex';
                     
-                    // ⚡ BARU: Cetak teks tanggal dinamis khusus permanen di dashboard atas
                     if (subUntil.includes("2099")) {
                         document.getElementById('dateDisplay').innerText = "💎 AKTIF SELAMANYA";
                     } else {
@@ -706,7 +705,6 @@
             document.getElementById('memberUsername').innerText = username;
             const formatTanggalDb = subUntil ? subUntil.replace(" ", "T") : '';
             
-            // ⚡ BARU: Interseptor logika penampil teks di lembar member card akun permanen
             if (subUntil && subUntil.includes("2099")) {
                 document.getElementById('memberExpiry').innerText = "💎 PERMANEN / AKTIF SELAMANYA";
             } else {
@@ -822,12 +820,14 @@
             updateLinkWhatsApp();
         }
 
+        // ⚡ BERHASIL DISINKRONKAN: Fungsi perakit link kasir murni diarahkan ke t.me/Keylia12 Telegram personal kamu
         function updateLinkWhatsApp() {
             const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
-            // ⚡ BARU: Logika penata string pesan WhatsApp khusus jika mendeteksi ID hari permanen (9999)
             const durasiTeks = detailHariGlobal === 9999 ? "Permanen (Selamanya)" : `${detailHariGlobal} Hari`;
             const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${durasiTeks} sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
-            document.getElementById('btnWA').href = `https://wa.me/${WA_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
+            
+            // Link dialihkan ke Telegram menggunakan t.me dengan parameter teks otomatis bawaan
+            document.getElementById('btnWA').href = `https://t.me/${TELE_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
         }
 
         function salinNomorDana() {
