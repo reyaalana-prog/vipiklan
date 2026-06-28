@@ -142,6 +142,7 @@
 
         async function tampilkanDashboardAdmin() {
             try {
+                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch(`/api/admin-manage?pin=${SEED_PIN}`);
                 if (!response.ok) throw new Error('PIN Akses Salah!');
                 
@@ -213,13 +214,11 @@
                     badgeClass = "status-active";
                 }
 
-                // ⚡ BARU: Interseptor teks badge status jika user terdaftar permanen tahun 2099
                 if (user.subUntil && user.subUntil.includes("2099")) {
                     statusText = "💎 PERMANEN";
                     badgeClass = "status-active";
                 }
 
-                // ⚡ BARU: Modifikasi teks cetak tanggal kadaluwarsa kolom tabel khusus permanen
                 const tampilTanggal = user.subUntil && user.subUntil.includes("2099")
                     ? "💎 AKTIF SELAMANYA"
                     : (user.subUntil ? new Date(formatTanggalDb).toLocaleString('id-ID') : 'Belum Set');
@@ -246,6 +245,7 @@
             if (!newPrice) return alert('Harga tidak boleh kosong!');
 
             try {
+                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
@@ -269,6 +269,7 @@
             if (!confirm(konfirmasiTeks)) return;
 
             try {
+                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
@@ -292,6 +293,7 @@
             if (!confirm(`Apakah Anda yakin ingin me-RESET masa aktif [ ${username} ] menjadi EXPIRED sekarang?`)) return;
 
             try {
+                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
