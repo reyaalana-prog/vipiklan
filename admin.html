@@ -103,7 +103,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 5px;">
                 <h3 style="margin: 10px 0;">Manajemen Hak Akses</h3>
-                <input type="text" id="userSearchInput" class="search-box" placeholder="🔍 Cari nama username di sini..." onkeyup="jalankanPencarian()">
+                <input type="text" id="userSearchInput" class="search-box" placeholder="🔍 Cari nama username di sini..." oninput="jalankanPencarian()">
             </div>
 
             <div class="user-table-wrapper">
@@ -131,18 +131,18 @@
         let SEED_PIN = localStorage.getItem('admin_session_pin') || '';
         let HARGA_PAKET = { 3: 5000, 10: 15000, 30: 30000 }; 
         let DATA_USER_GLOBAL = []; 
+        let SERVER_TIME_GLOBAL = Date.now();
 
         if (SEED_PIN) tampilkanDashboardAdmin();
 
         function verifikasiPin() {
-            SEED_PIN = document.getElementById('adminPinInput').value;
+            SEED_PIN = document.getElementById('adminPinInput').value.trim();
             if (!SEED_PIN) return alert('PIN wajib diisi!');
             tampilkanDashboardAdmin();
         }
 
         async function tampilkanDashboardAdmin() {
             try {
-                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch(`/api/admin-manage?pin=${SEED_PIN}`);
                 if (!response.ok) throw new Error('PIN Akses Salah!');
                 
@@ -162,8 +162,17 @@
                 }
 
                 DATA_USER_GLOBAL = data.users || [];
-                document.getElementById('userSearchInput').value = '';
-                renderDashboard(DATA_USER_GLOBAL, data.serverTime);
+                SERVER_TIME_GLOBAL = data.serverTime || Date.now();
+                
+                // Reset kolom input tanpa memicu event cascading bertumpuk
+                const pencarianInput = document.getElementById('userSearchInput');
+                if (pencarianInput) pencarianInput.value = '';
+
+                // Hitung statistik global sekali saja di sini
+                hitungDanTampilkanStatistik(DATA_USER_GLOBAL, SERVER_TIME_GLOBAL);
+                
+                // Render tabel secara bersih
+                renderDaftarUserTabel(DATA_USER_GLOBAL, SERVER_TIME_GLOBAL);
 
             } catch (error) {
                 alert(error.message);
@@ -171,34 +180,39 @@
             }
         }
 
+        function hitungDanTampilkanStatistik(users, serverTime) {
+            let totalPendaftar = users.length;
+            document.getElementById('totalUsers').innerText = totalPendaftar;
+            
+            let userAktifSkarang = users.filter(u => {
+                if (u.subUntil && u.subUntil.includes("2099")) return true;
+                const formatTgl = u.subUntil ? u.subUntil.replace(" ", "T") : '';
+                return formatTgl ? new Date(formatTgl).getTime() > serverTime : false;
+            }).length;
+            
+            document.getElementById('activeUsers').innerText = userAktifSkarang;
+            let estimasiOmset = userAktifSkarang * (HARGA_PAKET[30] || 30000);
+            document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
+        }
+
         function jalankanPencarian() {
             const kataKunci = document.getElementById('userSearchInput').value.toLowerCase().trim();
+            if (!kataKunci) {
+                renderDaftarUserTabel(DATA_USER_GLOBAL, SERVER_TIME_GLOBAL);
+                return;
+            }
             const hasilSaringan = DATA_USER_GLOBAL.filter(user => {
                 return user.username.toLowerCase().includes(kataKunci);
             });
-            renderDashboard(hasilSaringan, Date.now(), true);
+            renderDaftarUserTabel(hasilSaringan, SERVER_TIME_GLOBAL);
         }
 
-        function renderDashboard(users, serverTime, isSearching = false) {
+        function renderDaftarUserTabel(users, serverTime) {
             const tbody = document.getElementById('userTableBody');
             tbody.innerHTML = '';
 
-            if (!isSearching) {
-                let totalPendaftar = DATA_USER_GLOBAL.length;
-                document.getElementById('totalUsers').innerText = totalPendaftar;
-                
-                let userAktifSkarang = DATA_USER_GLOBAL.filter(u => {
-                    const formatTgl = u.subUntil ? u.subUntil.replace(" ", "T") : '';
-                    return formatTgl ? new Date(formatTgl).getTime() > serverTime : false;
-                }).length;
-                
-                document.getElementById('activeUsers').innerText = userAktifSkarang;
-                let estimasiOmset = userAktifSkarang * HARGA_PAKET[30];
-                document.getElementById('totalIncome').innerText = "Rp " + estimasiOmset.toLocaleString('id-ID');
-            }
-
             if (users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#aaa;">${isSearching ? 'Username tidak ditemukan.' : 'Belum ada data user.'}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#aaa;">Data user tidak ditemukan.</td></tr>`;
                 return;
             }
 
@@ -245,7 +259,6 @@
             if (!newPrice) return alert('Harga tidak boleh kosong!');
 
             try {
-                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
@@ -269,7 +282,6 @@
             if (!confirm(konfirmasiTeks)) return;
 
             try {
-                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
@@ -293,7 +305,6 @@
             if (!confirm(`Apakah Anda yakin ingin me-RESET masa aktif [ ${username} ] menjadi EXPIRED sekarang?`)) return;
 
             try {
-                // ⚡ DIKEMBALIKAN KE JALUR BENAR: Memanggil /api/admin-manage
                 const response = await fetch('/api/admin-manage', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-PIN': SEED_PIN },
