@@ -123,6 +123,10 @@
         <p>Saksikan video premium tanpa iklan terganggu</p>
         
         <form id="registerForm">
+            <div style="display: none !important;" aria-hidden="true">
+                <input type="text" id="address_line_confirm" name="address_line_confirm" autocomplete="off" tabindex="-1">
+            </div>
+
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required placeholder="Masukkan username" autocomplete="off">
@@ -144,29 +148,52 @@
         <p class="auth-link">Sudah punya akun? <a href="/login">Login di sini</a></p>
     </div>
 
-   <script>
+    <script>
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
+            // 🛡️ 1. VALIDASI HONEYPOT: Cek apakah input jebakan diisi oleh bot
+            const jebakanBot = document.getElementById('address_line_confirm').value;
+            if (jebakanBot !== "") {
+                // Jangan kirim apa pun ke server. Beri notifikasi palsu agar bot-nya mengira pendaftaran berhasil lalu pergi.
+                console.warn("Spam bot detected via honeypot.");
+                alert("Pendaftaran akun berhasil!");
+                window.location.href = '/login';
+                return;
+            }
+            
+            const usernameInput = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
+            // 🛡️ 2. VALIDASI FORMAT USERNAME (Anti-Nama Aneh Bot)
+            if (usernameInput.length < 4 || usernameInput.length > 15) {
+                alert("Gagal: Username harus memiliki panjang antara 4 sampai 15 karakter!");
+                return;
+            }
+
+            // Memaksa username hanya boleh berisi huruf kecil (a-z) dan angka (0-9) murni tanpa simbol/spasi
+            const regexBersih = /^[a-z0-9]+$/;
+            if (!regexBersih.test(usernameInput)) {
+                alert("Gagal: Username hanya boleh berisi huruf kecil dan angka saja, tanpa spasi/simbol!");
+                return;
+            }
+
             try {
-                // Mengirim data ke backend Cloudflare Pages Functions asli milikmu
+                // Mengirim data bersih ke backend Cloudflare Pages Functions
                 const response = await fetch('/api/auth-register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ username: usernameInput, email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
                     alert(data.message);
-                    window.location.href = '/login'; // Pindah ke halaman login kalau sukses
+                    window.location.href = '/login'; 
                 } else {
                     alert('Gagal: ' + data.error);
                 }
