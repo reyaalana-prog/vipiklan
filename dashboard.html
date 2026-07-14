@@ -827,7 +827,7 @@
             const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${durasiTeks} sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
             
             // Link dialihkan ke Telegram menggunakan t.me dengan parameter teks otomatis bawaan
-            document.getElementById('btnWA').href = `https://t.me/${TELE_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
+            document.getElementById('btnWA').href = `https://telegram.me/${TELE_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
         }
 
         function salinNomorDana() {
