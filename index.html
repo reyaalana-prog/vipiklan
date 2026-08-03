@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STREAMINGKU - Platform Video Premium Tanpa Iklan</title>
+    <title>STREAMINGKU - Platform Video Stream</title>
     <style>
-        /* 1. SETUP BACKGROUND UTAMA FULL LAYAR (ATAS SAMPAI BAWAH) */
+        /* 1. SETUP BACKGROUND UTAMA FULL LAYAR */
         body {
             font-family: sans-serif;
             background: #141414;
@@ -16,23 +16,20 @@
             min-height: 100vh;
         }
 
-        /* Trik Supaya Gambar Menyelimuti Seluruh Halaman dan Nge-blur Tanpa Merusak Tulisan */
         body::before {
             content: "";
-            position: fixed; /* Mengunci background agar tidak ikut bergerak saat di-scroll */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Tautan gambar kolase premium milik Arlyn */
             background: url('https://blogger.googleusercontent.com/img/a/AVvXsEiJKTMVMM8E-h3h-ohy6PF_oniBp_ngDrCdP4-GRih-j1_PrEDjw8svMaGfbfBhdYDO9EdhfmiRMzVsdM17N6nswLHRLQif0CLz4g4-kJduq9TXrJBe-XTV-U8bVjdD_xnPmJXS5DHDrPQUf1KiKyH2DsuwjOLDG2ePHLerYO_RZa7kBsoflx5d9-BZuAI') no-repeat center top;
             background-size: cover;
             filter: blur(3px) brightness(0.3); 
             transform: scale(1.02);
-            z-index: -2; /* Di paling belakang kodingan */
+            z-index: -2;
         }
 
-        /* Lapisan Kegelapan Ekstra untuk Area Content */
         .page-overlay {
             position: absolute;
             top: 0;
@@ -43,14 +40,14 @@
             z-index: -1;
         }
 
-        /* 2. HERO SECTION (BAGIAN ATAS) */
+        /* 2. HERO SECTION */
         .hero-section {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            min-height: 70vh;
+            min-height: 65vh;
             padding: 40px 20px;
             box-sizing: border-box;
         }
@@ -94,9 +91,20 @@
             transform: scale(0.96);
         }
 
-        /* 3. FITUR UNGGULAN SECTION (DENGAN BG TRANSPARAN) */
+        /* 3. SLOT IKLAN LANDING PAGE */
+        .ad-container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed #444;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* 4. FITUR UNGGULAN SECTION */
         .features-section {
-            padding: 60px 20px;
+            padding: 40px 20px 60px 20px;
             max-width: 1000px;
             margin: 0 auto;
             text-align: center;
@@ -141,121 +149,6 @@
             margin: 10px 0 0 0;
         }
 
-        /* 4. PRICING SECTION (DAFTAR HARGA PAKET) */
-        .pricing-section {
-            padding: 60px 20px;
-            background: rgba(10, 10, 10, 0.7); 
-            backdrop-filter: blur(5px);
-            text-align: center;
-        }
-
-        .pricing-section h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .pricing-section .sub {
-            color: #aaa;
-            margin-bottom: 40px;
-            font-size: 15px;
-        }
-
-        .pricing-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .price-card {
-            background: rgba(28, 28, 28, 0.85);
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 30px 20px;
-            width: 100%;
-            max-width: 260px;
-            box-sizing: border-box;
-            transition: 0.3s;
-            position: relative;
-        }
-
-        .price-card.popular {
-            border-color: #e50914;
-            transform: scale(1.03);
-            background: rgba(34, 20, 20, 0.9);
-        }
-
-        .badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #e50914;
-            color: white;
-            padding: 4px 12px;
-            font-size: 11px;
-            font-weight: bold;
-            border-radius: 20px;
-            text-transform: uppercase;
-        }
-
-        .price-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-        }
-
-        .price-amount {
-            font-size: 32px;
-            font-weight: bold;
-            color: #fff;
-            margin: 15px 0;
-        }
-
-        .price-amount span {
-            font-size: 14px;
-            color: #aaa;
-            font-weight: normal;
-        }
-
-        .price-features {
-            list-style: none;
-            padding: 0;
-            margin: 25px 0;
-            text-align: left;
-            font-size: 13px;
-            color: #ccc;
-        }
-
-        .price-features li {
-            margin-bottom: 10px;
-        }
-
-        .price-features li::before {
-            content: "✅ ";
-        }
-
-        .btn-select {
-            display: block;
-            text-decoration: none;
-            background: #333;
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: 0.2s;
-        }
-
-        .price-card.popular .btn-select {
-            background: #e50914;
-        }
-
-        .btn-select:hover {
-            opacity: 0.9;
-        }
-
         /* FOOTER */
         footer {
             padding: 40px 20px;
@@ -268,12 +161,11 @@
             z-index: 2;
         }
 
-        /* 🛠️ CSS KHUSUS TAMPILAN HP (MOBILE RESPONSIVE) */
+        /* MOBILE RESPONSIVE */
         @media (max-width: 480px) {
-            /* 🔥 OPTIMASI BACKGROUND DI HP: Mengubah ukuran agar pas di layar portrait tanpa nge-stretch parah */
             body::before {
                 background-position: center center;
-                background-size: auto 100vh; /* Mengunci tinggi gambar sesuai layar HP, membiarkan lebarnya proporsional */
+                background-size: auto 100vh;
             }
 
             .hero-section h1 {
@@ -289,20 +181,8 @@
                 width: 90%; 
                 box-sizing: border-box;
             }
-            .features-section h2, .pricing-section h2 {
+            .features-section h2 {
                 font-size: 22px;
-            }
-            .pricing-grid {
-                flex-direction: column; 
-                align-items: center;
-                gap: 25px;
-            }
-            .price-card {
-                max-width: 100%; 
-                width: 90%;
-            }
-            .price-card.popular {
-                transform: scale(1); 
             }
         }
     </style>
@@ -314,84 +194,38 @@
     <div class="hero-section">
         <div class="hero-content">
             <h1>STREAMINGKU</h1>
-            <p>Saksikan ratusan koleksi video premium kualitas super jernih tanpa gangguan jeda iklan. Daftar sekarang dan mulai maraton menonton!</p>
-            <a href="/register" class="btn-main">MULAI NONTON SEKARANG</a>
+            <p>Saksikan ratusan koleksi video streaming favoritmu secara langsung dan bebas tanpa ribet pendaftaran akun.</p>
+            <a href="dashboard.html" class="btn-main">MULAI NONTON SEKARANG</a>
         </div>
+    </div>
+
+    <!-- SLOT IKLAN BANNER LANDING PAGE -->
+    <div class="ad-container">
+        <!-- Tempelkan script iklan Banner kamu di sini -->
+        <span style="font-size: 12px; color: #888;">[ Space Iklan Banner ]</span>
     </div>
 
     <div class="features-section">
-        <h2>Kenapa Harus Nonton Di STREAMINGKU?</h2>
+        <h2>Keunggulan Nonton Di STREAMINGKU</h2>
         <div class="features-grid">
             <div class="feature-card">
-                <h3>🚫 Tanpa Iklan</h3>
-                <p>Nonton sepuasnya tanpa gangguan iklan pop-up atau video komersial di tengah jalan.</p>
-            </div>
-            <div class="feature-card">
                 <h3>⚡ Server Super Cepat</h3>
-                <p>Streaming anti-buffering menggunakan infrastruktur premium cloud berkecepatan tinggi.</p>
+                <p>Streaming lancar menggunakan infrastruktur video player yang responsif.</p>
             </div>
             <div class="feature-card">
-                <h3>🔒 Anti-Sharing System</h3>
-                <p>Keamanan akun terjamin ketat, privasi aktivitas menonton kamu tidak diganggu orang lain.</p>
+                <h3>🔓 Bebas Akses</h3>
+                <p>Tidak perlu ribet login atau mendaftar akun, tinggal klik dan langsung nonton.</p>
             </div>
-        </div>
-    </div>
-
-    <div class="pricing-section">
-        <h2>Pilih Paket Langganan Kamu</h2>
-        <p class="sub">Harga ekonomis, akses tanpa batas. Bisa bayar pakai QRIS atau DANA.</p>
-        
-        <div class="pricing-grid">
-            <div class="price-card">
-                <h3>Paket Hemat</h3>
-                <div class="price-amount">Rp 5rb<span>/ 3 Hari</span></div>
-                <ul class="price-features">
-                    <li>Akses Semua Video</li>
-                    <li>Kualitas Ultra HD</li>
-                    <li>Satu Perangkat Aktif</li>
-                    <li>Bebas Iklan</li>
-                </ul>
-                <a href="/register" class="btn-select">Pilih Paket</a>
-            </div>
-
-            <div class="price-card popular">
-                <div class="badge">Terpopuler</div>
-                <h3>Paket Populer</h3>
-                <div class="price-amount">Rp 15rb<span>/ 10 Hari</span></div>
-                <ul class="price-features">
-                    <li>Akses Semua Video</li>
-                    <li>Kualitas Ultra HD</li>
-                    <li>Satu Perangkat Aktif</li>
-                    <li>Bebas Iklan</li>
-                </ul>
-                <a href="/register" class="btn-select">Pilih Paket</a>
-            </div>
-
-            <div class="price-card">
-                <h3>Paket Sultan</h3>
-                <div class="price-amount">Rp 30rb<span>/ 30 Hari</span></div>
-                <ul class="price-features">
-                    <li>Akses Semua Video</li>
-                    <li>Kualitas Ultra HD</li>
-                    <li>Satu Perangkat Aktif</li>
-                    <li>Bebas Iklan</li>
-                </ul>
-                <a href="/register" class="btn-select">Pilih Paket</a>
+            <div class="feature-card">
+                <h3>📱 Responsif</h3>
+                <p>Dapat diakses dengan nyaman melalui HP, Tablet, maupun komputer laptop.</p>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>&copy; 2026 STREAMINGKU. All rights reserved. Dibuat dengan performa tinggi.</p>
+        <p>&copy; 2026 STREAMINGKU. All rights reserved.</p>
     </footer>
 
-    <script>
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-        const username = sessionStorage.getItem('username');
-
-        if (isLoggedIn === 'true' && username) {
-            window.location.href = '/dashboard';
-        }
-    </script>
 </body>
 </html>
