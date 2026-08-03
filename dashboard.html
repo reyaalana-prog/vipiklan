@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Streaming Premium</title>
+    <title>STREAMINGKU - Nonton Video Stream</title>
     <style>
         /* 1. SETUP DASAR */
         body { 
@@ -31,11 +31,10 @@
         }
 
         header h2 { font-size: 16px; margin: 0; }
-        .header-buttons { display: flex; gap: 8px; }
-        .btn-profile { background: #2ecc71; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-logout { background: #333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        header h2 span { color: #e50914; }
+        .btn-home { background: #e50914; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: none; }
 
-        /* 3. AREA VIDEO (TERKUNCI DI ATAS) */
+        /* 3. AREA VIDEO VIDEY (STICKY PLAYER) */
         .sticky-player-section {
             background: #000;
             width: 100%;
@@ -51,6 +50,7 @@
             margin: 0 auto;
             aspect-ratio: 16/9;
             position: relative;
+            background: #000;
         }
 
         #playingTitle {
@@ -60,10 +60,21 @@
             padding: 10px;
             text-align: center;
             color: #ccc;
-            transition: color 0.2s ease;
+            font-weight: bold;
         }
 
-        /* 4. AREA KATALOG (BISA DI-SCROLL) */
+        /* 4. SLOT IKLAN RESPANSIF */
+        .ad-slot-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px dashed #333;
+            padding: 8px;
+            text-align: center;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        .ad-slot-text { font-size: 10px; color: #666; display: block; margin-bottom: 4px; }
+
+        /* 5. AREA KATALOG (BISA DI-SCROLL) */
         .scrollable-content {
             flex: 1;
             overflow-y: auto;
@@ -71,13 +82,26 @@
             padding-bottom: 30px;
         }
 
-        /* 🔍 FILTER TOMBOL KATEGORI */
+        /* FILTER KATEGORI & SEARCH */
         .search-filter-wrapper {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .search-input:focus { border-color: #e50914; }
 
         .category-scroll-row {
             display: flex;
@@ -114,7 +138,7 @@
             padding-left: 10px;
         }
 
-        /* GRID KATALOG MURNI VISUAL */
+        /* GRID KATALOG VIDEO */
         .video-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
@@ -141,475 +165,210 @@
             position: relative;
             width: 100%;
             aspect-ratio: 16/9;
-            background: #000;
+            background: #0a0a0a;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .video-thumbnail { 
-            width: 100%; 
-            height: 100%;
-            object-fit: cover; 
-            display: block; 
+        .video-card-thumb-wrapper span {
+            font-size: 24px;
         }
 
-        .badge-new {
-            position: absolute;
-            top: 6px;
-            left: 6px;
-            background: #e50914; 
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 3px 6px;
-            border-radius: 3px;
-            z-index: 10;
-            text-transform: uppercase;
+        .video-info { padding: 10px; text-align: left; }
+        .video-title-text { 
+            font-size: 12px; 
+            font-weight: bold; 
+            color: #fff; 
+            margin: 0 0 4px 0; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
         }
+        .video-meta { font-size: 10px; color: #aaa; margin: 0; text-align: left; }
 
-        .btn-save-video {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            background: rgba(0, 0, 0, 0.7);
-            color: #fff;
-            border: none;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 11;
-        }
-        .btn-save-video.saved {
-            background: #f1c40f;
-            color: #000;
-        }
-
-        .video-info { padding: 8px; text-align: left; }
-        .video-meta { font-size: 10px; color: #aaa; margin: 0; text-align: center; }
-
-        /* 🎛️ STYLE NAVIGASI PAGINATION */
+        /* PAGINATION */
         .pagination-container {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 6px;
-            margin-top: 35px;
+            margin-top: 25px;
             margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
-        .btn-page-nav {
+        .btn-page-nav, .btn-page-number {
             background: #222;
             color: #fff;
             border: 1px solid #444;
-            padding: 6px 14px;
+            padding: 6px 12px;
             border-radius: 6px;
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
         }
-        .btn-page-nav:disabled {
-            background: #111;
-            color: #555;
-            border-color: #222;
-            cursor: not-allowed;
-        }
-
-        .btn-page-number {
-            background: #222;
-            color: #ccc;
-            border: 1px solid #444;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-page-number.active {
-            background: #e50914;
-            color: #fff;
-            border-color: #e50914;
-        }
-
-        /* MODAL DESIGNS */
-        .alert-expired { color: #ff4d4d; background: #2a1b1b; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; text-align: center; }
-        .package-options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .btn-pkg { background: #e50914; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-pkg span { font-size: 13px; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 4px; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: #fff; color: #000; width: 100%; max-width: 450px; border-radius: 15px; padding: 20px; text-align: center; position: relative; max-height: 90vh; overflow-y: auto; }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 26px; cursor: pointer; color: #888; font-weight: bold; }
-        
-        .profile-menu-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin-bottom: 15px; gap: 4px; }
-        .p-tab-btn { flex: 1; border: none; background: none; padding: 8px 4px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 11px; color: #555; }
-        .p-tab-btn.active { background: #2ecc71; color: #fff; }
-        .profile-section-content { display: none; text-align: left; }
-        .profile-section-content.active { display: block; }
-
-        .member-card {
-            background: linear-gradient(135deg, #2c3e50, #1a252f);
-            color: #fff;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            position: relative;
-            overflow: hidden;
-        }
-        .member-card h4 { margin: 0 0 10px 0; font-size: 16px; color: #f1c40f; }
-        .member-info-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 4px; }
-        
-        .btn-renew-premium { background: #e50914; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
-
-        .input-group { text-align: left; margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 12px; font-weight: bold; color: #333; margin-bottom: 4px; }
-        .input-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .btn-save-pw { background: #2ecc71; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 14px; }
-
-        .saved-videos-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-height: 250px; overflow-y: auto; }
-        .saved-item-card { background: #f8f9fa; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; cursor: pointer; position: relative; }
-        .saved-item-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
-        .saved-item-remove { position: absolute; top: 4px; right: 4px; background: rgba(239, 83, 80, 0.9); color: white; border: none; font-size: 10px; padding: 3px 6px; border-radius: 3px; }
-
-        .payment-tabs { display: flex; background: #f1f2f6; border-radius: 8px; padding: 4px; margin: 15px 0 10px 0; }
-        .tab-btn { flex: 1; border: none; background: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 13px; color: #555; }
-        .tab-btn.active { background: #e50914; color: #fff; }
-
-        .method-content { display: none; }
-        .method-content.active { display: block; }
-        .qris-img { width: 100%; max-width: 220px; margin: 5px 0; border: 1px solid #ddd; border-radius: 10px; display: inline-block; }
-        
-        .dana-account-box { background: #f0f7ff; border: 1px solid #3498db; border-radius: 10px; padding: 15px; margin: 15px 0; text-align: left; }
-        .dana-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
-        .dana-number { font-size: 18px; font-family: monospace; font-weight: bold; color: #2980b9; }
-        .btn-copy { background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11px; }
-
-        .price-box { background: #f8f9fa; border: 2px dashed #e50914; padding: 12px; border-radius: 10px; margin: 12px 0; }
-        .price-box h1 { margin: 0; color: #e50914; font-size: 26px; font-family: monospace; }
-        
-        /* 📱 DESIGN TOMBOL TELEGRAM BARU */
-        .btn-wa { background: #24a1de; color: white; border: none; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; text-decoration: none; display: block; box-sizing: border-box; text-align: center; border: 1px solid #2093ce; transition: 0.2s; }
-        .btn-wa:active { transform: scale(0.98); background: #1d8ec2; }
+        .btn-page-nav:disabled { background: #111; color: #555; border-color: #222; cursor: not-allowed; }
+        .btn-page-number.active { background: #e50914; color: #fff; border-color: #e50914; }
     </style>
+
+    <!-- SCRIPT TRIGGER POP-UNDER IKLAN GLOBAL -->
+    <script>
+        let popunderTriggered = false;
+        function triggerPopunderGlobal() {
+            if (!popunderTriggered) {
+                popunderTriggered = true;
+                console.log("Trigger Pop-under Ad!");
+                // TEMPELKAN SCRIPT POP-UNDER (misal Adsterra) DI SINI
+            }
+        }
+    </script>
 </head>
-<body>
+<body onclick="triggerPopunderGlobal()">
 
     <header>
-        <h2>Halo, <span id="userDisplay">...</span>! 👋</h2>
-        <div class="header-buttons">
-            <button class="btn-profile" onclick="bukaProfil()">👤 Profil</button>
-            <button class="btn-logout" onclick="logout()">Keluar</button>
-        </div>
+        <h2>STREAMING<span>KU</span></h2>
+        <a href="index.html" class="btn-home">🏠 Beranda</a>
     </header>
 
-    <div id="premiumArea" style="display: none; flex-direction: column; flex: 1;">
+    <div style="display: flex; flex-direction: column; flex: 1;">
+        
+        <!-- STICKY PLAYER AREA (VIDEY PLAYER) -->
         <div class="sticky-player-section">
             <div class="video-container">
-                <iframe id="bunnyPlayer" src="" 
+                <iframe id="videyPlayer" src="" 
                         style="border:0;position:absolute;top:0;left:0;height:100%;width:100%;" 
-                        allow="accelerometer;gyroscope;encrypted-media;picture-in-picture;" 
-                        allowfullscreen="true"
-                        onload="videoSelesaiMemuat()">
+                        allow="accelerometer; gyroscope; encrypted-media; picture-in-picture;" 
+                        allowfullscreen="true">
                 </iframe>
             </div>
-            <p id="playingTitle">Selamat menonton 🍿</p>
+            <p id="playingTitle">Pilih video di bawah untuk mulai memutar 🍿</p>
         </div>
 
         <div class="scrollable-content">
-            <p style="font-size: 12px; color: #2ecc71; margin-bottom: 15px; margin-top: 0;">
-                ✅ Premium Aktif sampai: <span id="dateDisplay"></span>
-            </p>
 
+            <!-- SLOT IKLAN BANNER #1 (BAWAH PLAYER) -->
+            <div class="ad-slot-box">
+                <span class="ad-slot-text">[ Iklan Banner Under Player ]</span>
+                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
+            </div>
+
+            <!-- SEARCH & FILTER KATEGORI -->
             <div class="search-filter-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari judul video..." onkeyup="jalankanFilterKatalog(true)">
                 <div class="category-scroll-row">
                     <button class="btn-cat-filter active" id="cat-semua" onclick="gantiKategoriFilter('semua')">✨ Semua Video</button>
-                    <button class="btn-cat-filter" id="cat-hijab" onclick="gantiKategoriFilter('hijab')">🧕 Hijab</button>
-                    <button class="btn-cat-filter" id="cat-pelajar" onclick="gantiKategoriFilter('pelajar')">🎓 Pelajar</button>
+                    <button class="btn-cat-filter" id="cat-umum" onclick="gantiKategoriFilter('umum')">🎬 Umum</button>
                 </div>
             </div>
 
-            <h3 class="playlist-title">Koleksi Video Premium</h3>
+            <h3 class="playlist-title">Koleksi Video Stream</h3>
+
+            <!-- GRID KATALOG VIDEO -->
             <div id="videoList" class="video-grid">
-                <p style="color: #aaa;">Sedang mengambil daftar video...</p>
+                <p style="color: #aaa; grid-column: 1/-1; text-align: center;">Sedang mengambil data video dari Supabase...</p>
+            </div>
+
+            <!-- SLOT IKLAN BANNER #2 (TENTANG KATALOG) -->
+            <div class="ad-slot-box">
+                <span class="ad-slot-text">[ Iklan Banner Middle ]</span>
+                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
             </div>
 
             <div id="paginationArea" class="pagination-container"></div>
         </div>
     </div>
 
-    <div id="expiredArea" style="display: none;" class="scrollable-content">
-        <div class="alert-expired">
-            <h3>🔒 Akses Terkunci!</h3>
-            <p>Masa aktif kamu sudah kedaluwarsa. Silakan pilih paket di bawah untuk memperpanjang paket premium:</p>
-            
-            <div class="package-options">
-                <button class="btn-pkg" onclick="bukaBayar(3, 5000)">
-                    🚀 Paket Hemat (3 Hari) <span>Rp 5.000</span>
-                </button>
-                <button class="btn-pkg" onclick="bukaBayar(10, 15000)">
-                    🔥 Paket Populer (10 Hari) <span>Rp 15.000</span>
-                </button>
-                <button class="btn-pkg" onclick="bukaBayar(30, 30000)">
-                    👑 Paket Sultan (30 Hari) <span>Rp 30.000</span>
-                </button>
-                <button class="btn-pkg" style="background: linear-gradient(135deg, #e50914, #f1c40f); color: white;" onclick="bukaBayar(9999, 130000)">
-                    💎 Paket Permanen (Selamanya) <span>Rp 130.000</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalProfil" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal" onclick="tutupProfil()">&times;</span>
-            
-            <div class="profile-menu-tabs">
-                <button id="pTabStatus" class="p-tab-btn active" onclick="gantiMenuProfil('status')">📊 Status VIP</button>
-                <button id="pTabVideo" class="p-tab-btn" onclick="gantiMenuProfil('video')">💾 Tersimpan</button>
-                <button id="pTabSandi" class="p-tab-btn" onclick="gantiMenuProfil('sandi')">🔐 Ganti Sandi</button>
-            </div>
-            
-            <div id="profilKontenStatus" class="profile-section-content active">
-                <div class="member-card">
-                    <h4>👑 STREAMINGKU MEMBER CARD</h4>
-                    <div class="member-info-row">
-                        <span>Nama Pengguna</span>
-                        <span id="memberUsername" style="color:#fff;">...</span>
-                    </div>
-                    <div class="member-info-row">
-                        <span>Status Layanan</span>
-                        <span>PREMIUM ACTIVE</span>
-                    </div>
-                    <div class="member-info-row">
-                        <span>Masa Berlaku</span>
-                        <span id="memberExpiry" style="color: #f1c40f;">...</span>
-                    </div>
-                </div>
-
-                <button class="btn-renew-premium" id="btnKlikPerpanjang" onclick="tampilkanOpsiPaketPerpanjang()">⚡ PERPANJANG PAKET SEKARANG</button>
-
-                <div id="pilihanPaketPerpanjang">
-                    <p class="judul-perpanjang">Pilih Durasi Ekstensi Paket:</p>
-                    <div class="package-options" style="margin-top: 5px;">
-                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(3, 5000)">
-                            🚀 Paket Hemat (3 Hari) <span style="font-size:11px;">Rp 5.000</span>
-                        </button>
-                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(10, 15000)">
-                            🔥 Paket Populer (10 Hari) <span style="font-size:11px;">Rp 15.000</span>
-                        </button>
-                        <button class="btn-pkg" style="padding: 10px; font-size: 12px;" onclick="eksekusiPerpanjang(30, 30000)">
-                            👑 Paket Sultan (30 Hari) <span style="font-size:11px;">Rp 30.000</span>
-                        </button>
-                        <button class="btn-pkg" style="padding: 10px; font-size: 12px; background: linear-gradient(135deg, #e50914, #f1c40f);" onclick="eksekusiPerpanjang(9999, 130000)">
-                            💎 Paket Permanen (Selamanya) <span style="font-size:11px;">Rp 130.000</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="profilKontenVideo" class="profile-section-content">
-                <h4 style="margin: 0 0 10px 0; color: #333;">Daftar Tonton Nanti:</h4>
-                <div id="savedVideosList" class="saved-videos-container"></div>
-            </div>
-
-            <div id="profilKontenSandi" class="profile-section-content">
-                <h4 style="margin: 0 0 15px 0; color: #333;">Pengaturan Kata Sandi</h4>
-                <div class="input-group">
-                    <label>Username Anda:</label>
-                    <input type="text" id="profileUsername" disabled style="background: #f1f2f6; color: #777; font-weight: bold;">
-                </div>
-                <div class="input-group">
-                    <label>Password Lama:</label>
-                    <input type="password" id="oldPassword" placeholder="Masukkan password saat ini">
-                </div>
-                <div class="input-group">
-                    <label>Password Baru:</label>
-                    <input type="password" id="newPassword" placeholder="Masukkan password baru">
-                </div>
-                <button class="btn-save-pw" onclick="gantiPassword()">SIMPAN PASSWORD BARU</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalBayar" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal" onclick="tutupBayar()">&times;</span>
-            <h3 style="margin: 0; font-size: 18px;">Pilih Metode Bayar</h3>
-            
-            <div class="payment-tabs">
-                <button id="tabQris" class="tab-btn active" onclick="gantiMetode('qris')">📱 Scan QRIS</button>
-                <button id="tabDana" class="tab-btn" onclick="gantiMetode('dana')">💙 Kirim DANA</button>
-            </div>
-            
-            <div id="kontenQris" class="method-content active">
-                <p style="font-size: 12px; color: #666; margin: 5px 0;">Scan QRIS di bawah menggunakan Dana, OVO, GoPay, atau LinkAja</p>
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhrbb0v4NESqsTLGft7Qi24p9T7NTc759i7WD4tQoUb9quuz2wrHfI9NVsl3mXOG9I2FKhBgwITE9S5Mmj1kTRWZMO8yQE66opTWs8Gx_MkJLf137mo3_emk_7ahkIIZXG0mcKvmrYnKIr_b8Fc4l815tnO8p2u4qyj1NBeWa0QtukmtCXwk6zPsGg_hfQ/s825/photo_2026-06-11_20-45-17.jpg" class="qris-img" alt="QRIS Merchant">
-            </div>
-
-            <div id="kontenDana" class="method-content">
-                <p style="font-size: 12px; color: #666; margin: 5px 0;">Silakan transfer langsung sesama aplikasi DANA ke akun Admin:</p>
-                <div class="dana-account-box">
-                    <span style="font-size: 11px; color: #7f8c8d; font-weight: bold;">NOMOR AKUN DANA (A.N ARLYN):</span>
-                    <div class="dana-row">
-                        <span id="danaNumberText" class="dana-number">083138319827</span> <button class="btn-copy" onclick="salinNomorDana()">Salin</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="price-box">
-                <p style="font-size: 12px; margin: 0 0 5px 0; color: #555; font-weight: bold;">INFO TOTAL TRANSFER:</p>
-                <h1 id="tampilHarga">Rp 0</h1>
-                <p style="font-size: 10px; color: #e67e22; margin: 5px 0 0 0; font-weight: bold;">*Wajib transfer tepat sampai digit terakhir agar cepat dicek admin</p>
-            </div>
-
-            <a id="btnWA" href="#" target="_blank" class="btn-wa">SAYA SUDAH TRANSFER (VIA TELEGRAM)</a>
-        </div>
-    </div>
-
     <script>
-        const LIBRARY_ID = "680881"; 
-        // ⚡ BERHASIL DISINKRONKAN: Konfigurasi target utama dialihkan murni ke username Telegram kamu
-        const TELE_ADMIN = "Keylia12"; 
-        let metodeTerpilih = "qris";
-        let detailHariGlobal = 0;
-        let hargaFinalGlobal = 0;
-        let sisaHariUser = 0; 
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
-
-        // 🎛️ VARIABEL PAGINATION (25 VIDEO PER HALAMAN)
         let halamanAktifGlobal = 1;
-        const ITEM_PER_PAGE = 25;
+        const ITEM_PER_PAGE = 24; // 24 Video per Halaman
 
-        // 🛠️ ID FOLDER COLLECTION
-        const FOLDER_ID_HIJAB   = "dfb7766d-0bd5-4f75-9601-c0648a1f4020";
-        const FOLDER_ID_PELAJAR = "c7833291-eeca-47b4-bd1c-fdb0597e538d";
+        // 1. Ambil Video dari Cloudflare Worker -> Supabase API
+        async function loadVideosFromAPI() {
+            try {
+                const response = await fetch('/api/get-videos');
+                const videos = await response.json();
 
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-        const username = sessionStorage.getItem('username');
-        const subUntil = sessionStorage.getItem('subUntil');
+                if (videos.error) throw new Error(videos.error);
 
-        if (isLoggedIn !== 'true' || !username) {
-            window.location.href = '/login';
-        } else {
-            document.getElementById('userDisplay').innerText = username;
-            const aerospaceTime = new Date().getTime();
-            
-            if (!subUntil || subUntil === 'expired' || subUntil === 'null') {
-                document.getElementById('expiredArea').style.display = 'block';
-            } else {
-                const formatTanggalDb = subUntil.replace(" ", "T");
-                const tanggalMasaAktif = new Date(formatTanggalDb).getTime();
-                
-                if (tanggalMasaAktif > aerospaceTime) {
-                    if (subUntil.includes("2099")) {
-                        sisaHariUser = 9999;
-                    } else {
-                        sisaHariUser = Math.ceil((tanggalMasaAktif - aerospaceTime) / (1000 * 60 * 60 * 24));
-                    }
-                    document.getElementById('premiumArea').style.display = 'flex';
-                    
-                    if (subUntil.includes("2099")) {
-                        document.getElementById('dateDisplay').innerText = "💎 AKTIF SELAMANYA";
-                    } else {
-                        document.getElementById('dateDisplay').innerText = new Date(formatTanggalDb).toLocaleString('id-ID');
-                    }
-                    loadBunnyVideos();
-                } else {
-                    document.getElementById('expiredArea').style.display = 'block';
+                databaseVideosGlobal = videos || [];
+                jalankanFilterKatalog(true);
+
+                // Autoplay Video Pertama jika Tersedia
+                if (databaseVideosGlobal.length > 0) {
+                    playVidey(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
                 }
+            } catch (error) {
+                document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d; grid-column: 1/-1; text-align: center;">Gagal memuat video: ${error.message}</p>`;
             }
         }
 
-        // ================= KONTROL FILTER AUTOMATIC & HALAMAN =================
+        // 2. Play Video via Videy iFrame
+        function playVidey(videyId, title) {
+            const player = document.getElementById('videyPlayer');
+            const titleBox = document.getElementById('playingTitle');
+
+            player.src = `https://videy.co/v?id=${videyId}`;
+            titleBox.innerText = `▶️ ${title || 'Memutar Video'}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 3. Filter & Render Katalog Video
         function gantiKategoriFilter(namaKategori) {
             kategoriAktifGlobal = namaKategori;
-            const semuaTombol = document.querySelectorAll('.btn-cat-filter');
-            semuaTombol.forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`cat-${namaKategori}`).classList.add('active');
+            document.querySelectorAll('.btn-cat-filter').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(`cat-${namaKategori}`);
+            if (targetBtn) targetBtn.classList.add('active');
             jalankanFilterKatalog(true); 
         }
 
         function jalankanFilterKatalog(resetKeHalamanSatu = false) {
-            if (resetKeHalamanSatu) {
-                halamanAktifGlobal = 1;
-            }
+            if (resetKeHalamanSatu) halamanAktifGlobal = 1;
 
             const container = document.getElementById('videoList');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             container.innerHTML = '';
 
             let videoTersaring = databaseVideosGlobal;
 
-            if (sisaHariUser <= 3) {
-                videoTersaring = databaseVideosGlobal.filter(video => {
-                    const tags = video.tags ? video.tags.toLowerCase() : '';
-                    return tags.includes('hemat') || tags === ''; 
-                });
+            // Filter Kategori
+            if (kategoriAktifGlobal !== 'semua') {
+                videoTersaring = videoTersaring.filter(v => (v.kategori || 'umum').toLowerCase() === kategoriAktifGlobal.toLowerCase());
             }
 
-            if (kategoriAktifGlobal !== 'semua') {
-                videoTersaring = videoTersaring.filter(video => {
-                    const idFolderVideo = String(video.collectionId);
-                    if (kategoriAktifGlobal === 'hijab') return idFolderVideo === FOLDER_ID_HIJAB;
-                    if (kategoriAktifGlobal === 'pelajar') return idFolderVideo === FOLDER_ID_PELAJAR;
-                    return true;
-                });
+            // Filter Search Query
+            if (searchQuery) {
+                videoTersaring = videoTersaring.filter(v => v.title.toLowerCase().includes(searchQuery));
             }
 
             if (videoTersaring.length === 0) {
-                container.innerHTML = `<p style="color: #aaa; grid-column: 1/-1; text-align: center; padding: 20px;">🔍 Ups, video tidak ditemukan...</p>`;
+                container.innerHTML = `<p style="color: #aaa; grid-column: 1/-1; text-align: center; padding: 20px;">🔍 Video tidak ditemukan...</p>`;
                 document.getElementById('paginationArea').innerHTML = '';
                 return;
             }
 
-            const totalDataTersaring = videoTersaring.length;
-            const totalHalaman = Math.ceil(totalDataTersaring / ITEM_PER_PAGE);
-            
+            // Hitung Pagination
+            const totalHalaman = Math.ceil(videoTersaring.length / ITEM_PER_PAGE);
             const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
-            const indeksAkhir = indeksAwal + ITEM_PER_PAGE;
-            const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAkhir);
+            const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAwal + ITEM_PER_PAGE);
 
-            const listSimpan = ambilDaftarSimpan();
-
+            // Render Card Video
             videoHalamanIni.forEach(video => {
-                if (!video.guid) return;
-                const menit = Math.floor((video.length || 0) / 60);
-                const detik = (video.length || 0) % 60;
-                const durasi = `${menit}:${detik < 10 ? '0' : ''}${detik}`;
-
-                let komponenBadgeNew = '';
-                if (video.dateCreated) {
-                    const tanggalUpload = Date.parse(video.dateCreated);
-                    const tanggalSekarang = Date.now();
-                    if (tanggalSekarang - tanggalUpload < 3 * 24 * 60 * 60 * 1000 && tanggalSekarang >= tanggalUpload) {
-                        komponenBadgeNew = `<span class="badge-new">NEW</span>`;
-                    }
-                }
-
-                const sudahDisimpan = listSimpan.some(item => item.guid === video.guid);
-                const teksTombol = sudahDisimpan ? "⭐ Tersimpan" : "💾 Simpan";
-                const kelasTombol = sudahDisimpan ? "btn-save-video saved" : "btn-save-video";
-
                 const card = document.createElement('div');
                 card.className = 'video-card';
-                card.onclick = () => playVideo(video.guid);
-                
-                const thumbnailUrl = `https://vz-99c5be47-12d.b-cdn.net/${video.guid}/${video.thumbnailFileName}`;
+                card.onclick = () => playVidey(video.videy_id, video.title);
 
                 card.innerHTML = `
                     <div class="video-card-thumb-wrapper">
-                        ${komponenBadgeNew}
-                        <button class="${kelasTombol}" onclick="toggleSimpanVideo(event, '${video.guid}', '${video.thumbnailFileName}')">${teksTombol}</button>
-                        <img class="video-thumbnail" src="${thumbnailUrl}" alt="Video" onerror="this.src='https://via.placeholder.com/320x180/222/fff?text=No+Thumbnail'">
+                        <span>▶️</span>
                     </div>
                     <div class="video-info">
-                        <p class="video-meta">⏱️ ${durasi}</p>
+                        <p class="video-title-text">${escapeHtml(video.title)}</p>
+                        <p class="video-meta">${escapeHtml(video.kategori || 'Umum')}</p>
                     </div>
                 `;
                 container.appendChild(card);
@@ -618,6 +377,7 @@
             buatTombolNavigasiHalaman(totalHalaman);
         }
 
+        // 4. Buat Tombol Pagination
         function buatTombolNavigasiHalaman(totalHalaman) {
             const areaPaginasi = document.getElementById('paginationArea');
             areaPaginasi.innerHTML = '';
@@ -651,192 +411,15 @@
             document.querySelector('.playlist-title').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // ================= LOADING UTAMA VIDEO BUNNY NET =================
-        async function loadBunnyVideos() {
-            try {
-                const token = sessionStorage.getItem('sessionToken'); 
-                const response = await fetch(`/api/get-videos?user=${username}&token=${token}`);
-                const videos = await response.json();
-                
-                if (videos.error === "KICK_USER") {
-                    alert(videos.message);
-                    logout();
-                    return;
-                }
-
-                if (videos.error) throw new Error(videos.error);
-                databaseVideosGlobal = videos; 
-
-                jalankanFilterKatalog(true);
-
-                const player = document.getElementById('bunnyPlayer');
-                if (databaseVideosGlobal.length > 0 && player.src === "") {
-                    playVideo(databaseVideosGlobal[0].guid);
-                }
-
-            } catch (error) {
-                document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d;">Error: ${error.message}</p>`;
-            }
-        }
-
-        function playVideo(videoId) {
-            const titleBox = document.getElementById('playingTitle');
-            titleBox.style.color = '#f1c40f'; 
-            titleBox.innerText = "⏳ Sedang memuat video premium..."; 
-            
-            const player = document.getElementById('bunnyPlayer');
-            player.src = `https://iframe.mediadelivery.net/embed/${LIBRARY_ID}/${videoId}?autoplay=true`;
-        }
-
-        function videoSelesaiMemuat() {
-            const titleBox = document.getElementById('playingTitle');
-            const player = document.getElementById('bunnyPlayer');
-            if (player.src !== window.location.href && player.src !== "") {
-                titleBox.style.color = '#ccc'; 
-                titleBox.innerText = "Selamat menonton 🍿";
-            }
-        }
-
-        // ================= MODAL PROFILE CONTROLLERS =================
-        function bukaProfil() {
-            document.getElementById('profileUsername').value = username;
-            document.getElementById('oldPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('memberUsername').innerText = username;
-            const formatTanggalDb = subUntil ? subUntil.replace(" ", "T") : '';
-            
-            if (subUntil && subUntil.includes("2099")) {
-                document.getElementById('memberExpiry').innerText = "💎 PERMANEN / AKTIF SELAMANYA";
-            } else {
-                document.getElementById('memberExpiry').innerText = subUntil && subUntil !== 'expired' && subUntil !== 'null'
-                    ? new Date(formatTanggalDb).toLocaleString('id-ID')
-                    : "Sudah Habis Masa Aktif";
-            }
-
-            document.getElementById('pilihanPaketPerpanjang').style.display = 'none';
-            document.getElementById('btnKlikPerpanjang').style.display = 'block';
-
-            gantiMenuProfil('status');
-            document.getElementById('modalProfil').style.display = 'flex';
-        }
-
-        function tutupProfil() { document.getElementById('modalProfil').style.display = 'none'; }
-
-        function gantiMenuProfil(menu) {
-            const tabs = [document.getElementById('pTabStatus'), document.getElementById('pTabVideo'), document.getElementById('pTabSandi')];
-            const kontens = [document.getElementById('profilKontenStatus'), document.getElementById('profilKontenVideo'), document.getElementById('profilKontenSandi')];
-            tabs.forEach(t => t.classList.remove('active'));
-            kontens.forEach(k => k.classList.remove('active'));
-
-            if (menu === 'status') { tabs[0].classList.add('active'); kontens[0].classList.add('active'); }
-            else if (menu === 'video') { tabs[1].classList.add('active'); kontens[1].classList.add('active'); renderSavedVideosArea(); }
-            else { tabs[2].classList.add('active'); kontens[2].classList.add('active'); }
-        }
-
-        function tampilkanOpsiPaketPerpanjang() {
-            document.getElementById('btnKlikPerpanjang').style.display = 'none';
-            document.getElementById('pilihanPaketPerpanjang').style.display = 'block';
-        }
-
-        function eksekusiPerpanjang(hari, hargaBase) { tutupProfil(); bukaBayar(hari, hargaBase); }
-
-        async function gantiPassword() {
-            const oldPw = document.getElementById('oldPassword').value.trim();
-            const newPw = document.getElementById('newPassword').value.trim();
-            const token = sessionStorage.getItem('sessionToken');
-            if (!oldPw || !newPw) { alert('Semua baris kolom input wajib diisi!'); return; }
-            try {
-                const response = await fetch('/api/change-password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user: username, token: token, oldPassword: oldPw, newPassword: newPw })
-                });
-                const hasil = await response.json();
-                if (hasil.success) { alert('Selamat! Password Anda sukses diperbarui.'); tutupProfil(); }
-                else { alert('Gagal ganti password: ' + hasil.message); }
-            } catch (error) { alert('Gagal tersambung ke sistem server: ' + error.message); }
-        }
-
-        // ================= STORAGE MANAGEMENT (WATCH LATER) =================
-        function ambilDaftarSimpan() {
-            const key = `saved_videos_${username}`;
-            return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : [];
-        }
-
-        function toggleSimpanVideo(e, guid, thumbName) {
-            e.stopPropagation();
-            const key = `saved_videos_${username}`;
-            let list = ambilDaftarSimpan();
-            const index = list.findIndex(item => item.guid === guid);
-            if (index > -1) {
-                list.splice(index, 1);
-                e.target.classList.remove('saved'); e.target.innerText = "💾 Simpan";
-            } else {
-                list.push({ guid: guid, thumbnailFileName: thumbName });
-                e.target.classList.add('saved'); e.target.innerText = "⭐ Tersimpan";
-            }
-            localStorage.setItem(key, JSON.stringify(list));
-        }
-
-        function hapusDariMenuProfil(e, guid) {
-            e.stopPropagation();
-            const key = `saved_videos_${username}`;
-            let list = ambilDaftarSimpan().filter(item => item.guid !== guid);
-            localStorage.setItem(key, JSON.stringify(list));
-            renderSavedVideosArea();
-            jalankanFilterKatalog();
-        }
-
-        function renderSavedVideosArea() {
-            const box = document.getElementById('savedVideosList'); box.innerHTML = '';
-            const list = ambilDaftarSimpan();
-            if (list.length === 0) { box.innerHTML = `<p style="color: #666; font-size: 13px; text-align:center; margin: 20px 0; grid-column: span 2;">Belum ada video.</p>`; return; }
-            list.forEach(item => {
-                const card = document.createElement('div'); card.className = 'saved-item-card';
-                card.onclick = () => { playVideo(item.guid); tutupProfil(); };
-                card.innerHTML = `
-                    <img class="saved-item-thumb" src="https://vz-99c5be47-12d.b-cdn.net/${item.guid}/${item.thumbnailFileName}" onerror="this.src='https://via.placeholder.com/160x90/222/fff?text=No+Thumb'">
-                    <button class="saved-item-remove" onclick="hapusDariMenuProfil(event, '${item.guid}')">❌ Hapus</button>
-                `;
-                box.appendChild(card);
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
-        // ================= KASIR MANAGEMENT SYSTEM =================
-        function bukaBayar(hari, hargaBase) {
-            const kodeUnik = Math.floor(100 + Math.random() * 899);
-            hargaFinalGlobal = hargaBase + kodeUnik; detailHariGlobal = hari;
-            document.getElementById('tampilHarga').innerText = "Rp " + hargaFinalGlobal.toLocaleString('id-ID');
-            updateLinkWhatsApp(); gantiMetode('qris');
-            document.getElementById('modalBayar').style.display = 'flex';
-        }
-
-        function gantiMetode(metode) {
-            metodeTerpilih = metode;
-            const tQris = document.getElementById('tabQris'); const tDana = document.getElementById('tabDana');
-            const kQris = document.getElementById('kontenQris'); const kDana = document.getElementById('kontenDana');
-            if (metode === 'qris') { tQris.classList.add('active'); tDana.classList.remove('active'); kQris.classList.add('active'); kDana.classList.remove('active'); }
-            else { tDana.classList.add('active'); tQris.classList.remove('active'); kDana.classList.add('active'); kQris.classList.remove('active'); }
-            updateLinkWhatsApp();
-        }
-
-        // ⚡ BERHASIL DISINKRONKAN: Fungsi perakit link kasir murni diarahkan ke t.me/Keylia12 Telegram personal kamu
-        function updateLinkWhatsApp() {
-            const namaMetode = metodeTerpilih === 'qris' ? 'QRIS (E-Wallet)' : 'Transfer Langsung DANA';
-            const durasiTeks = detailHariGlobal === 9999 ? "Permanen (Selamanya)" : `${detailHariGlobal} Hari`;
-            const templatePesan = `Halo Admin STREAMINGKU, saya sudah melakukan pembayaran Paket Premium ${durasiTeks} sebesar Rp ${hargaFinalGlobal.toLocaleString('id-ID')} menggunakan metode [ ${namaMetode} ]. Mohon cek aplikasi mutasi dan aktifkan akun saya.\n\nDetail Akun:\n- Username: ${username}`;
-            
-            // Link dialihkan ke Telegram menggunakan t.me dengan parameter teks otomatis bawaan
-            document.getElementById('btnWA').href = `https://telegram.me/${TELE_ADMIN}?text=${encodeURIComponent(templatePesan)}`;
-        }
-
-        function salinNomorDana() {
-            const nomorDana = document.getElementById('danaNumberText').innerText;
-            navigator.clipboard.writeText(nomorDana).then(() => alert('Nomor DANA berhasil disalin!'));
-        }
-
-        function tutupBayar() { document.getElementById('modalBayar').style.display = 'none'; }
-        function logout() { sessionStorage.clear(); window.location.href = '/login'; }
+        // Jalankan saat pertama dimuat
+        loadVideosFromAPI();
     </script>
 </body>
 </html>
