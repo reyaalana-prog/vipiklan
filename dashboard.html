@@ -175,36 +175,17 @@
             position: relative;
             width: 100%;
             aspect-ratio: 16/9;
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: #0f172a;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .play-btn-icon {
-            width: 46px;
-            height: 46px;
-            background: #e50914;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
-            transition: transform 0.2s;
-        }
-
-        .video-card:hover .play-btn-icon {
-            transform: scale(1.1);
-        }
-
-        .play-triangle {
-            width: 0;
-            height: 0;
-            border-top: 9px solid transparent;
-            border-bottom: 9px solid transparent;
-            border-left: 15px solid #ffffff;
-            margin-left: 3px;
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         /* PAGINATION */
@@ -233,14 +214,12 @@
         .btn-page-number.active { background: #e50914; color: #fff; border-color: #e50914; }
     </style>
 
-    <!-- SCRIPT TRIGGER POP-UNDER IKLAN GLOBAL -->
     <script>
         let popunderTriggered = false;
         function triggerPopunderGlobal() {
             if (!popunderTriggered) {
                 popunderTriggered = true;
                 console.log("Trigger Pop-under Ad!");
-                // TEMPELKAN SCRIPT POP-UNDER (misal Adsterra) DI SINI
             }
         }
     </script>
@@ -254,7 +233,7 @@
 
     <div style="display: flex; flex-direction: column; flex: 1;">
         
-        <!-- STICKY PLAYER AREA (HTML5 VIDEO PLAYER DIRECT CDN) -->
+        <!-- STICKY PLAYER AREA -->
         <div class="sticky-player-section">
             <div class="video-container">
                 <video id="videyPlayer" controls autoplay playsinline preload="metadata">
@@ -267,10 +246,9 @@
 
         <div class="scrollable-content">
 
-            <!-- SLOT IKLAN BANNER #1 (BAWAH PLAYER) -->
+            <!-- SLOT IKLAN BANNER #1 -->
             <div class="ad-slot-box">
                 <span class="ad-slot-text">[ Iklan Banner Under Player ]</span>
-                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
             </div>
 
             <!-- SEARCH & FILTER KATEGORI -->
@@ -289,10 +267,9 @@
                 <p style="color: #aaa; grid-column: 1/-1; text-align: center;">Sedang mengambil data video dari Supabase...</p>
             </div>
 
-            <!-- SLOT IKLAN BANNER #2 (TENTANG KATALOG) -->
+            <!-- SLOT IKLAN BANNER #2 -->
             <div class="ad-slot-box">
                 <span class="ad-slot-text">[ Iklan Banner Middle ]</span>
-                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
             </div>
 
             <div id="paginationArea" class="pagination-container"></div>
@@ -303,9 +280,9 @@
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
         let halamanAktifGlobal = 1;
-        const ITEM_PER_PAGE = 24; // 24 Video per Halaman
+        const ITEM_PER_PAGE = 24;
 
-        // 1. Ambil Video dari Cloudflare Worker -> Supabase API
+        // 1. Ambil Video dari Supabase API
         async function loadVideosFromAPI() {
             try {
                 const response = await fetch('/api/get-videos');
@@ -316,7 +293,6 @@
                 databaseVideosGlobal = videos || [];
                 jalankanFilterKatalog(true);
 
-                // Autoplay Video Pertama jika Tersedia
                 if (databaseVideosGlobal.length > 0) {
                     playVidey(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
                 }
@@ -325,22 +301,47 @@
             }
         }
 
-        // 2. Play Video via Direct HTML5 Video Player (CDN2 Videy)
+        // 2. Play Video Utama
         function playVidey(videyId, title) {
             const player = document.getElementById('videyPlayer');
             const source = document.getElementById('videoSource');
             const titleBox = document.getElementById('playingTitle');
 
-            // Mengarahkan langsung ke direct file MP4 di cdn2.videy.co
             source.src = `https://cdn2.videy.co/${videyId}.mp4`;
             player.load();
-            player.play().catch(e => console.log("Autoplay blocked by browser:", e));
+            player.play().catch(e => console.log("Autoplay blocked:", e));
 
             titleBox.innerText = `▶️ ${title || 'Memutar Video'}`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 3. Filter & Render Katalog Video
+        // 3. Auto Generate Frame Thumbnail dari File MP4
+        function generateAutoThumbnail(videyId, imgElementId) {
+            const v = document.createElement('video');
+            v.src = `https://cdn2.videy.co/${videyId}.mp4#t=0.5`;
+            v.crossOrigin = "anonymous";
+            v.muted = true;
+            v.playsInline = true;
+
+            v.addEventListener('loadeddata', function() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 320;
+                    canvas.height = 180;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+                    
+                    const imgEl = document.getElementById(imgElementId);
+                    if (imgEl) {
+                        imgEl.src = canvas.toDataURL('image/jpeg');
+                    }
+                } catch (e) {
+                    console.log("Canvas blocked:", e);
+                }
+            });
+        }
+
+        // 4. Filter & Render Katalog Video
         function gantiKategoriFilter(namaKategori) {
             kategoriAktifGlobal = namaKategori;
             document.querySelectorAll('.btn-cat-filter').forEach(btn => btn.classList.remove('active'));
@@ -358,12 +359,10 @@
 
             let videoTersaring = databaseVideosGlobal;
 
-            // Filter Kategori
             if (kategoriAktifGlobal !== 'semua') {
                 videoTersaring = videoTersaring.filter(v => (v.kategori || 'umum').toLowerCase() === kategoriAktifGlobal.toLowerCase());
             }
 
-            // Filter Search Query
             if (searchQuery) {
                 videoTersaring = videoTersaring.filter(v => v.title.toLowerCase().includes(searchQuery));
             }
@@ -374,31 +373,36 @@
                 return;
             }
 
-            // Hitung Pagination
             const totalHalaman = Math.ceil(videoTersaring.length / ITEM_PER_PAGE);
             const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
             const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAwal + ITEM_PER_PAGE);
 
-            // Render Card Video (Pure Graphic CSS Icon Play, No String Escape Bug)
-            videoHalamanIni.forEach(video => {
+            // Fallback SVG sebelum frame video tercapture
+            const placeholderSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="100%" height="100%" fill="%231e293b"/><circle cx="160" cy="90" r="24" fill="%23e50914"/><polygon points="154,80 172,90 154,100" fill="%23ffffff"/></svg>`;
+
+            videoHalamanIni.forEach((video, index) => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
                 card.onclick = () => playVidey(video.videy_id, video.title);
 
+                const imgId = `thumb_img_${index}`;
+
+                // Hanya render elemen gambar thumbnail tanpa div .video-info (teks judul)
                 card.innerHTML = `
                     <div class="video-card-thumb-wrapper">
-                        <div class="play-btn-icon">
-                            <div class="play-triangle"></div>
-                        </div>
+                        <img id="${imgId}" class="thumb-img" src="${placeholderSvg}" alt="Play">
                     </div>
                 `;
                 container.appendChild(card);
+
+                // Jalankan ekstraksi thumbnail otomatis dari file video
+                generateAutoThumbnail(video.videy_id, imgId);
             });
 
             buatTombolNavigasiHalaman(totalHalaman);
         }
 
-        // 4. Buat Tombol Pagination
+        // 5. Buat Tombol Pagination
         function buatTombolNavigasiHalaman(totalHalaman) {
             const areaPaginasi = document.getElementById('paginationArea');
             areaPaginasi.innerHTML = '';
@@ -432,14 +436,6 @@
             document.querySelector('.playlist-title').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-            });
-        }
-
-        // Jalankan saat pertama dimuat
         loadVideosFromAPI();
     </script>
 </body>
