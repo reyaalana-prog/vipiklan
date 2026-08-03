@@ -1,7 +1,7 @@
 export async function onRequest(context) {
   // 1. Ambil Kunci Kredensial Supabase dari Environment Variables Cloudflare / Direct Variable
-  const SUPABASE_URL = context.env.SUPABASE_URL || "https://oqyyrqxwzqbvjclfbtmo.supabase.co";
-  const SUPABASE_KEY = context.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeXlycXh3enFidmpjbGZidG1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0MTA1MzAsImV4cCI6MjA5NDk4NjUzMH0.0p0OZJRu9l2I5pobxA5j9q8UO91Vg-PXo9YwBOHVYeY";
+  const SUPABASE_URL = context.env.SUPABASE_URL || "https://rpwpufayiqhqjbygssas.supabase.co";
+  const SUPABASE_KEY = context.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwd3B1ZmF5aXFocWpieWdzc2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwNjQ3MzYsImV4cCI6MjA5ODY0MDczNn0.gf8wHrw3XV3nXD8JYfCHPGfyuMS7-JXxYwd0KTHnuEg";
 
   const headers = {
     "apikey": SUPABASE_KEY,
