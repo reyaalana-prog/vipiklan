@@ -96,6 +96,61 @@
         .adblock-overlay p { font-size: 13px; color: #ccc; max-width: 400px; margin-bottom: 15px; line-height: 1.5; }
         .btn-refresh { background: #e50914; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
+        /* MODAL VERIFIKASI UMUR (SMARTLINK ADSTERRA) */
+        .age-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .age-modal-box {
+            background: #1f1f1f;
+            border: 1px solid #333;
+            border-top: 4px solid #e50914;
+            border-radius: 12px;
+            padding: 25px 20px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .age-modal-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .age-modal-box p {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .btn-verify-age {
+            width: 100%;
+            background: #e50914;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-verify-age:active { transform: scale(0.97); }
+
         /* 4. SLOT IKLAN RESPANSIF */
         .ad-slot-box {
             background: rgba(0, 0, 0, 0.4);
@@ -268,6 +323,15 @@
 </head>
 <body onclick="triggerPopunderGlobal()">
 
+    <!-- MODAL VERIFIKASI UMUR ADSTERRA SMARTLINK -->
+    <div id="ageVerificationModal" class="age-modal-overlay">
+        <div class="age-modal-box">
+            <h3>🔞 Verifikasi Umur</h3>
+            <p>Konten ini dikhususkan untuk pengguna berusia 18 tahun ke atas. Klik tombol di bawah untuk melanjutkan pemutaran video.</p>
+            <button class="btn-verify-age" onclick="konfirmasiVerifikasiUmur()">SAYA BERUSIA 18+ TAHUN</button>
+        </div>
+    </div>
+
     <header>
         <h2>STREAMING<span>KU</span></h2>
         <a href="index.html" class="btn-home">🏠 Beranda</a>
@@ -319,11 +383,18 @@
     </div>
 
     <script>
+        // PASTA KODE SMARTLINK ADSTERRA KAMU DI SINI
+        const ADSTERRA_SMARTLINK = "https://researchingsweatexit.com/wjnm791b?key=9f807821993342169c2e6256ceaa74bf";
+
         let isAdBlockActive = false;
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
         let halamanAktifGlobal = 1;
         const ITEM_PER_PAGE = 24;
+
+        // Variabel penampung video sementara sebelum verifikasi
+        let pendingVideyId = "";
+        let pendingTitle = "";
 
         // ANTI-ADBLOCK / ANTI-ADGUARD CHECKER
         async function checkAdBlocker() {
@@ -339,7 +410,7 @@
         function blokirPlayerAksess() {
             const playerContainer = document.getElementById('playerContainer');
             const player = document.getElementById('videyPlayer');
-            player.pause();
+            if (player) player.pause();
             
             playerContainer.innerHTML = `
                 <div class="adblock-overlay">
@@ -361,21 +432,47 @@
                 databaseVideosGlobal = videos || [];
                 jalankanFilterKatalog(true);
 
+                // Load video pertama tanpa paksa verifikasi umur saat landing
                 if (databaseVideosGlobal.length > 0 && !isAdBlockActive) {
-                    playVidey(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
+                    eksekusiPlayDirect(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
                 }
             } catch (error) {
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d; grid-column: 1/-1; text-align: center;">Gagal memuat video: ${error.message}</p>`;
             }
         }
 
-        // 2. Play Video via Direct HTML5 Video Player
+        // 2. Memicu Modal Verifikasi Umur Setiap Memilih Video
         function playVidey(videyId, title) {
             if (isAdBlockActive) {
                 blokirPlayerAksess();
                 return;
             }
 
+            // Simpan data video target
+            pendingVideyId = videyId;
+            pendingTitle = title;
+
+            // Tampilkan Modal Verifikasi Umur
+            document.getElementById('ageVerificationModal').style.display = 'flex';
+        }
+
+        // Eksekusi Pemutaran Video setelah Verifikasi Klik
+        function konfirmasiVerifikasiUmur() {
+            // Sembunyikan Modal
+            document.getElementById('ageVerificationModal').style.display = 'none';
+
+            // Open Smartlink Adsterra di Tab Baru
+            if (ADSTERRA_SMARTLINK && ADSTERRA_SMARTLINK !== "https://www.highrevenuegate.com/example_smartlink") {
+                window.open(ADSTERRA_SMARTLINK, '_blank');
+            }
+
+            // Putar Video Target di Tab Utama saat ini
+            if (pendingVideyId) {
+                eksekusiPlayDirect(pendingVideyId, pendingTitle);
+            }
+        }
+
+        function eksekusiPlayDirect(videyId, title) {
             const player = document.getElementById('videyPlayer');
             const source = document.getElementById('videoSource');
             const titleBox = document.getElementById('playingTitle');
