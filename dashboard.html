@@ -1,888 +1,442 @@
 <!DOCTYPE html>
-
 <html lang="id">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>STREAMINGKU - Nonton Video Stream</title>
-
     <style>
-
         /* 1. SETUP DASAR */
-
         body { 
-
             font-family: sans-serif; 
-
             background: #141414; 
-
             color: white; 
-
             margin: 0; 
-
             padding: 0; 
-
             overflow-x: hidden;
-
             display: flex;
-
             flex-direction: column;
-
             height: 100vh;
-
         }
-
-
 
         /* 2. HEADER MINIMALIS */
-
         header { 
-
             background: #000;
-
             display: flex; 
-
             justify-content: space-between; 
-
             align-items: center; 
-
             padding: 10px 15px; 
-
             border-bottom: 1px solid #333;
-
             height: 50px;
-
             box-sizing: border-box;
-
         }
-
-
 
         header h2 { font-size: 16px; margin: 0; }
-
         header h2 span { color: #e50914; }
-
         .btn-home { background: #e50914; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-decoration: none; }
 
-
-
         /* 3. AREA VIDEO (STICKY PLAYER NATIVE HTML5) */
-
         .sticky-player-section {
-
             background: #000;
-
             width: 100%;
-
             z-index: 100;
-
             position: sticky;
-
             top: 0;
-
             border-bottom: 2px solid #e50914;
-
         }
-
-
 
         .video-container {
-
             width: 100%;
-
             max-width: 900px;
-
             margin: 0 auto;
-
             aspect-ratio: 16/9;
-
             position: relative;
-
             background: #000;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
         }
-
-
 
         .video-container video {
-
             width: 100%;
-
             height: 100%;
-
             object-fit: contain;
-
             outline: none;
-
         }
-
-
 
         #playingTitle {
-
             font-size: 14px;
-
             background: #141414;
-
             margin: 0;
-
             padding: 10px;
-
             text-align: center;
-
             color: #ccc;
-
             font-weight: bold;
-
         }
-
-
 
         /* 4. SLOT IKLAN RESPANSIF */
-
         .ad-slot-box {
-
             background: rgba(0, 0, 0, 0.4);
-
             border: 1px dashed #333;
-
             padding: 8px;
-
             text-align: center;
-
             margin: 10px 0;
-
             border-radius: 6px;
-
         }
-
         .ad-slot-text { font-size: 10px; color: #666; display: block; margin-bottom: 4px; }
 
-
-
         /* 5. AREA KATALOG (BISA DI-SCROLL) */
-
         .scrollable-content {
-
             flex: 1;
-
             overflow-y: auto;
-
             padding: 15px;
-
             padding-bottom: 30px;
-
         }
-
-
 
         /* FILTER KATEGORI & SEARCH */
-
         .search-filter-wrapper {
-
             margin-bottom: 15px;
-
             display: flex;
-
             flex-direction: column;
-
             gap: 10px;
-
         }
-
-
 
         .search-input {
-
             width: 100%;
-
             padding: 10px 14px;
-
             background: #222;
-
             border: 1px solid #333;
-
             border-radius: 6px;
-
             color: #fff;
-
             font-size: 13px;
-
             box-sizing: border-box;
-
             outline: none;
-
         }
-
         .search-input:focus { border-color: #e50914; }
 
-
-
         .category-scroll-row {
-
             display: flex;
-
             gap: 8px;
-
             overflow-x: auto;
-
             padding-bottom: 5px;
-
             scrollbar-width: none;
-
         }
-
         .category-scroll-row::-webkit-scrollbar { display: none; }
 
-
-
         .btn-cat-filter {
-
             background: #222;
-
             color: #ccc;
-
             border: 1px solid #333;
-
             padding: 8px 16px;
-
             border-radius: 20px;
-
             font-size: 13px;
-
             font-weight: bold;
-
             cursor: pointer;
-
             white-space: nowrap;
-
             transition: 0.2s;
-
         }
-
-
 
         .btn-cat-filter.active {
-
             background: #e50914;
-
             color: #fff;
-
             border-color: #e50914;
-
         }
-
-
 
         .playlist-title {
-
             font-size: 16px;
-
             margin: 5px 0 15px 0;
-
             border-left: 4px solid #e50914;
-
             padding-left: 10px;
-
         }
-
-
 
         /* GRID KATALOG VIDEO */
-
         .video-grid { 
-
             display: grid; 
-
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-
             gap: 15px; 
-
         }
-
-
 
         @media (max-width: 480px) {
-
             .video-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-
         }
-
-
 
         .video-card { 
-
             background: #222; 
-
             border-radius: 8px; 
-
             overflow: hidden; 
-
             cursor: pointer; 
-
             border: 1px solid #333; 
-
             transition: 0.2s; 
-
             position: relative;
-
         }
-
         
-
         .video-card:active { transform: scale(0.95); }
 
-
-
         .video-card-thumb-wrapper {
-
             position: relative;
-
             width: 100%;
-
             aspect-ratio: 16/9;
-
             background: #0a0a0a;
-
             overflow: hidden;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
         }
 
-
-
-        .video-card-thumb-wrapper img {
-
+        .video-card-thumb-wrapper video {
             width: 100%;
-
             height: 100%;
-
             object-fit: cover;
-
+            pointer-events: none;
         }
-
-
 
         .video-info { padding: 10px; text-align: left; }
-
         .video-title-text { 
-
             font-size: 12px; 
-
             font-weight: bold; 
-
             color: #fff; 
-
             margin: 0 0 4px 0; 
-
             white-space: nowrap; 
-
             overflow: hidden; 
-
             text-overflow: ellipsis; 
-
         }
-
         .video-meta { font-size: 10px; color: #aaa; margin: 0; text-align: left; }
 
-
-
         /* PAGINATION */
-
         .pagination-container {
-
             display: flex;
-
             justify-content: center;
-
             align-items: center;
-
             gap: 6px;
-
             margin-top: 25px;
-
             margin-bottom: 10px;
-
             flex-wrap: wrap;
-
         }
-
-
 
         .btn-page-nav, .btn-page-number {
-
             background: #222;
-
             color: #fff;
-
             border: 1px solid #444;
-
             padding: 6px 12px;
-
             border-radius: 6px;
-
             font-size: 12px;
-
             font-weight: bold;
-
             cursor: pointer;
-
             transition: 0.2s;
-
         }
-
         .btn-page-nav:disabled { background: #111; color: #555; border-color: #222; cursor: not-allowed; }
-
         .btn-page-number.active { background: #e50914; color: #fff; border-color: #e50914; }
-
     </style>
 
-
-
     <!-- SCRIPT TRIGGER POP-UNDER IKLAN GLOBAL -->
-
     <script>
-
         let popunderTriggered = false;
-
         function triggerPopunderGlobal() {
-
             if (!popunderTriggered) {
-
                 popunderTriggered = true;
-
                 console.log("Trigger Pop-under Ad!");
-
                 // TEMPELKAN SCRIPT POP-UNDER (misal Adsterra) DI SINI
-
             }
-
         }
-
     </script>
-
 </head>
-
 <body onclick="triggerPopunderGlobal()">
 
-
-
     <header>
-
         <h2>STREAMING<span>KU</span></h2>
-
         <a href="index.html" class="btn-home">🏠 Beranda</a>
-
     </header>
 
-
-
     <div style="display: flex; flex-direction: column; flex: 1;">
-
         
-
         <!-- STICKY PLAYER AREA (HTML5 VIDEO PLAYER DIRECT CDN) -->
-
         <div class="sticky-player-section">
-
             <div class="video-container">
-
                 <video id="videyPlayer" controls autoplay playsinline preload="metadata">
-
                     <source id="videoSource" src="" type="video/mp4">
-
                     Browser kamu tidak mendukung pemutar video ini.
-
                 </video>
-
             </div>
-
             <p id="playingTitle">Pilih video di bawah untuk mulai memutar 🍿</p>
-
         </div>
-
-
 
         <div class="scrollable-content">
 
-
-
             <!-- SLOT IKLAN BANNER #1 (BAWAH PLAYER) -->
-
             <div class="ad-slot-box">
-
                 <span class="ad-slot-text">[ Iklan Banner Under Player ]</span>
-
                 <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
-
             </div>
-
-
 
             <!-- SEARCH & FILTER KATEGORI -->
-
             <div class="search-filter-wrapper">
-
                 <input type="text" id="searchInput" class="search-input" placeholder="🔍 Cari judul video..." onkeyup="jalankanFilterKatalog(true)">
-
                 <div class="category-scroll-row">
-
                     <button class="btn-cat-filter active" id="cat-semua" onclick="gantiKategoriFilter('semua')">✨ Semua Video</button>
-
                     <button class="btn-cat-filter" id="cat-umum" onclick="gantiKategoriFilter('umum')">🎬 Umum</button>
-
                 </div>
-
             </div>
-
-
 
             <h3 class="playlist-title">Koleksi Video Stream</h3>
 
-
-
             <!-- GRID KATALOG VIDEO -->
-
             <div id="videoList" class="video-grid">
-
                 <p style="color: #aaa; grid-column: 1/-1; text-align: center;">Sedang mengambil data video dari Supabase...</p>
-
             </div>
-
-
 
             <!-- SLOT IKLAN BANNER #2 (TENTANG KATALOG) -->
-
             <div class="ad-slot-box">
-
                 <span class="ad-slot-text">[ Iklan Banner Middle ]</span>
-
                 <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
-
             </div>
 
-
-
             <div id="paginationArea" class="pagination-container"></div>
-
         </div>
-
     </div>
 
-
-
     <script>
-
         let databaseVideosGlobal = []; 
-
         let kategoriAktifGlobal = "semua"; 
-
         let halamanAktifGlobal = 1;
-
         const ITEM_PER_PAGE = 24; // 24 Video per Halaman
 
-
-
         // 1. Ambil Video dari Cloudflare Worker -> Supabase API
-
         async function loadVideosFromAPI() {
-
             try {
-
                 const response = await fetch('/api/get-videos');
-
                 const videos = await response.json();
-
-
 
                 if (videos.error) throw new Error(videos.error);
 
-
-
                 databaseVideosGlobal = videos || [];
-
                 jalankanFilterKatalog(true);
 
-
-
                 // Autoplay Video Pertama jika Tersedia
-
                 if (databaseVideosGlobal.length > 0) {
-
                     playVidey(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
-
                 }
-
             } catch (error) {
-
                 document.getElementById('videoList').innerHTML = `<p style="color: #ff4d4d; grid-column: 1/-1; text-align: center;">Gagal memuat video: ${error.message}</p>`;
-
             }
-
         }
-
-
 
         // 2. Play Video via Direct HTML5 Video Player (CDN2 Videy)
-
         function playVidey(videyId, title) {
-
             const player = document.getElementById('videyPlayer');
-
             const source = document.getElementById('videoSource');
-
             const titleBox = document.getElementById('playingTitle');
 
-
-
             // Mengarahkan langsung ke direct file MP4 di cdn2.videy.co
-
             source.src = `https://cdn2.videy.co/${videyId}.mp4`;
-
             player.load();
-
             player.play().catch(e => console.log("Autoplay blocked by browser:", e));
 
-
-
             titleBox.innerText = `▶️ ${title || 'Memutar Video'}`;
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
-
         }
-
-
 
         // 3. Filter & Render Katalog Video
-
         function gantiKategoriFilter(namaKategori) {
-
             kategoriAktifGlobal = namaKategori;
-
             document.querySelectorAll('.btn-cat-filter').forEach(btn => btn.classList.remove('active'));
-
             const targetBtn = document.getElementById(`cat-${namaKategori}`);
-
             if (targetBtn) targetBtn.classList.add('active');
-
             jalankanFilterKatalog(true); 
-
         }
 
-
-
         function jalankanFilterKatalog(resetKeHalamanSatu = false) {
-
             if (resetKeHalamanSatu) halamanAktifGlobal = 1;
 
-
-
             const container = document.getElementById('videoList');
-
             const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-
             container.innerHTML = '';
-
-
 
             let videoTersaring = databaseVideosGlobal;
 
-
-
             // Filter Kategori
-
             if (kategoriAktifGlobal !== 'semua') {
-
                 videoTersaring = videoTersaring.filter(v => (v.kategori || 'umum').toLowerCase() === kategoriAktifGlobal.toLowerCase());
-
             }
-
-
 
             // Filter Search Query
-
             if (searchQuery) {
-
                 videoTersaring = videoTersaring.filter(v => v.title.toLowerCase().includes(searchQuery));
-
             }
-
-
 
             if (videoTersaring.length === 0) {
-
                 container.innerHTML = `<p style="color: #aaa; grid-column: 1/-1; text-align: center; padding: 20px;">🔍 Video tidak ditemukan...</p>`;
-
                 document.getElementById('paginationArea').innerHTML = '';
-
                 return;
-
             }
 
-
-
             // Hitung Pagination
-
             const totalHalaman = Math.ceil(videoTersaring.length / ITEM_PER_PAGE);
-
             const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
-
             const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAwal + ITEM_PER_PAGE);
 
-
-
-            // Poster Graphic SVG Otomatis (Ringan, Tanpa Error CORS)
-
-            const svgThumb = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%231e293b"/><stop offset="100%" stop-color="%230f172a"/></linearGradient></defs><rect width="100%" height="100%" fill="url(%23g)"/><circle cx="160" cy="90" r="28" fill="%23e50914" opacity="0.9"/><polygon points="152,78 174,90 152,102" fill="%23ffffff"/></svg>`;
-
-
-
-            // Render Card Video
-
+            // Render Card Video dengan Preview Frame Otomatis
             videoHalamanIni.forEach(video => {
-
                 const card = document.createElement('div');
-
                 card.className = 'video-card';
-
                 card.onclick = () => playVidey(video.videy_id, video.title);
 
-
-
                 card.innerHTML = `
-
                     <div class="video-card-thumb-wrapper">
-
-                        <img src="${svgThumb}" alt="Play" style="width:100%; height:100%; object-fit:cover;">
-
+                        <video src="https://cdn2.videy.co/${video.videy_id}.mp4#t=0.5" preload="metadata" muted playsinline></video>
                     </div>
-
                     <div class="video-info">
-
                         <p class="video-title-text">${escapeHtml(video.title)}</p>
-
-                        <p class="video-meta">🎬 ${escapeHtml(video.kategori || 'Umum')}</p>
-
+                        <p class="video-meta">${escapeHtml(video.kategori || 'Umum')}</p>
                     </div>
-
                 `;
-
                 container.appendChild(card);
-
             });
 
-
-
             buatTombolNavigasiHalaman(totalHalaman);
-
         }
 
-
-
         // 4. Buat Tombol Pagination
-
         function buatTombolNavigasiHalaman(totalHalaman) {
-
             const areaPaginasi = document.getElementById('paginationArea');
-
             areaPaginasi.innerHTML = '';
-
-
 
             if (totalHalaman <= 1) return;
 
-
-
             const btnPrev = document.createElement('button');
-
             btnPrev.className = 'btn-page-nav';
-
             btnPrev.innerText = '⬅️ Prev';
-
             btnPrev.disabled = halamanAktifGlobal === 1;
-
             btnPrev.onclick = () => { halamanAktifGlobal--; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
-
             areaPaginasi.appendChild(btnPrev);
 
-
-
             for (let i = 1; i <= totalHalaman; i++) {
-
                 const btnNum = document.createElement('button');
-
                 btnNum.className = i === halamanAktifGlobal ? 'btn-page-number active' : 'btn-page-number';
-
                 btnNum.innerText = i;
-
                 btnNum.onclick = () => { halamanAktifGlobal = i; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
-
                 areaPaginasi.appendChild(btnNum);
-
             }
 
-
-
             const btnNext = document.createElement('button');
-
             btnNext.className = 'btn-page-nav';
-
             btnNext.innerText = 'Next ➡️';
-
             btnNext.disabled = halamanAktifGlobal === totalHalaman;
-
             btnNext.onclick = () => { halamanAktifGlobal++; jalankanFilterKatalog(); scrollKeKatalogAtas(); };
-
             areaPaginasi.appendChild(btnNext);
-
         }
-
-
 
         function scrollKeKatalogAtas() {
-
             document.querySelector('.playlist-title').scrollIntoView({ behavior: 'smooth' });
-
         }
-
-
 
         function escapeHtml(str) {
-
             if (!str) return '';
-
             return str.replace(/[&<>"']/g, function(m) {
-
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-
             });
-
         }
 
-
-
         // Jalankan saat pertama dimuat
-
         loadVideosFromAPI();
-
     </script>
-
 </body>
-
-</html> 
-
+</html>
