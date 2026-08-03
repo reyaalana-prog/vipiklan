@@ -105,6 +105,8 @@
             cursor: pointer;
             font-size: 13px;
             transition: 0.2s;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-overlay-action:active { transform: scale(0.96); }
 
@@ -332,7 +334,7 @@
 
     <script>
         // SMARTLINK ADSTERRA KAMU
-        const ADSTERRA_SMARTLINK = "https://www.highrevenuegate.com/example_smartlink";
+        const ADSTERRA_SMARTLINK = "https://researchingsweatexit.com/wjnm791b?key=9f807821993342169c2e6256ceaa74bf";
 
         let isAdBlockActive = false;
         let databaseVideosGlobal = []; 
@@ -398,13 +400,15 @@
             const existingVideo = document.getElementById('videyPlayer');
             if (existingVideo) existingVideo.pause();
 
-            // Tampilkan Overlay Verifikasi Umur hanya di dalam kotak video
+            // Tampilkan Overlay Verifikasi dengan tombol <a> murni untuk bypass blokir pop-up
             const playerContainer = document.getElementById('playerContainer');
             playerContainer.innerHTML = `
                 <div class="player-overlay-box">
                     <h3>🔞 Verifikasi Umur (18+)</h3>
                     <p>Konten ini khusus dewasa. Klik tombol di bawah untuk verifikasi dan mulai menonton video.</p>
-                    <button class="btn-overlay-action" onclick="konfirmasiVerifikasiUmur()">SAYA BERUSIA 18+ TAHUN</button>
+                    <a href="${ADSTERRA_SMARTLINK}" target="_blank" class="btn-overlay-action" onclick="konfirmasiVerifikasiUmur()">
+                        SAYA BERUSIA 18+ TAHUN
+                    </a>
                 </div>
             `;
 
@@ -412,17 +416,13 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Eksekusi Pemutaran Video Setelah Tombol Verifikasi Diklik
+        // Eksekusi Pemutaran Video di Tab Utama Setelah Tombol Verifikasi Diklik
         function konfirmasiVerifikasiUmur() {
-            // Buka Smartlink Adsterra di Tab Baru
-            if (ADSTERRA_SMARTLINK && ADSTERRA_SMARTLINK !== "https://researchingsweatexit.com/wjnm791b?key=9f807821993342169c2e6256ceaa74bf") {
-                window.open(ADSTERRA_SMARTLINK, '_blank');
-            }
-
-            // Kembalikan HTML Video Player & Putar Video di Tab Utama
-            if (pendingVideyId) {
-                eksekusiPlayDirect(pendingVideyId, pendingTitle);
-            }
+            setTimeout(() => {
+                if (pendingVideyId) {
+                    eksekusiPlayDirect(pendingVideyId, pendingTitle);
+                }
+            }, 300);
         }
 
         function eksekusiPlayDirect(videyId, title) {
