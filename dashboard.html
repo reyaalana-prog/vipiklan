@@ -73,6 +73,29 @@
             font-weight: bold;
         }
 
+        /* OVERLAY KETIKA ADBLOCK / ADGUARD AKTIF */
+        .adblock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 200;
+        }
+
+        .adblock-overlay h3 { color: #e50914; margin-bottom: 10px; font-size: 18px; }
+        .adblock-overlay p { font-size: 13px; color: #ccc; max-width: 400px; margin-bottom: 15px; line-height: 1.5; }
+        .btn-refresh { background: #e50914; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
         /* 4. SLOT IKLAN RESPANSIF */
         .ad-slot-box {
             background: rgba(0, 0, 0, 0.4);
@@ -232,11 +255,10 @@
     <script>
         let popunderTriggered = false;
         function triggerPopunderGlobal() {
-            if (!popunderTriggered) {
+            if (!popunderTriggered && !isAdBlockActive) {
                 popunderTriggered = true;
                 console.log("Trigger Pop-under Ad!");
                 
-                // INJEKSI SCRIPT POPUNDER OTOMATIS
                 const adScript = document.createElement('script');
                 adScript.src = "https://researchingsweatexit.com/6a/b4/a1/6ab4a1257cd2d998cb53993cd0c7c6b1.js";
                 document.body.appendChild(adScript);
@@ -253,9 +275,9 @@
 
     <div style="display: flex; flex-direction: column; flex: 1;">
         
-        <!-- STICKY PLAYER AREA (HTML5 VIDEO PLAYER DIRECT CDN) -->
+        <!-- STICKY PLAYER AREA -->
         <div class="sticky-player-section">
-            <div class="video-container">
+            <div id="playerContainer" class="video-container">
                 <video id="videyPlayer" controls autoplay playsinline preload="metadata">
                     <source id="videoSource" src="" type="video/mp4">
                     Browser kamu tidak mendukung pemutar video ini.
@@ -266,10 +288,9 @@
 
         <div class="scrollable-content">
 
-            <!-- SLOT IKLAN BANNER #1 (BAWAH PLAYER) -->
+            <!-- SLOT IKLAN BANNER #1 -->
             <div class="ad-slot-box">
                 <span class="ad-slot-text">[ Iklan Banner Under Player ]</span>
-                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
             </div>
 
             <!-- SEARCH & FILTER KATEGORI -->
@@ -288,10 +309,9 @@
                 <p style="color: #aaa; grid-column: 1/-1; text-align: center;">Sedang mengambil data video dari Supabase...</p>
             </div>
 
-            <!-- SLOT IKLAN BANNER #2 (TENTANG KATALOG) -->
+            <!-- SLOT IKLAN BANNER #2 -->
             <div class="ad-slot-box">
                 <span class="ad-slot-text">[ Iklan Banner Middle ]</span>
-                <!-- TEMPELKAN KODE BANNER IKLAN KAMU DI SINI -->
             </div>
 
             <div id="paginationArea" class="pagination-container"></div>
@@ -299,10 +319,36 @@
     </div>
 
     <script>
+        let isAdBlockActive = false;
         let databaseVideosGlobal = []; 
         let kategoriAktifGlobal = "semua"; 
         let halamanAktifGlobal = 1;
-        const ITEM_PER_PAGE = 24; // 24 Video per Halaman
+        const ITEM_PER_PAGE = 24;
+
+        // ANTI-ADBLOCK / ANTI-ADGUARD CHECKER
+        async function checkAdBlocker() {
+            const fakeAdUrl = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+            try {
+                await fetch(fakeAdUrl, { method: 'HEAD', mode: 'no-cors' });
+            } catch (e) {
+                isAdBlockActive = true;
+                blokirPlayerAksess();
+            }
+        }
+
+        function blokirPlayerAksess() {
+            const playerContainer = document.getElementById('playerContainer');
+            const player = document.getElementById('videyPlayer');
+            player.pause();
+            
+            playerContainer.innerHTML = `
+                <div class="adblock-overlay">
+                    <h3>⚠️ AdBlocker / AdGuard Terdeteksi</h3>
+                    <p>Mohon matikan AdBlocker / AdGuard di browser kamu untuk menonton video gratis di website ini.</p>
+                    <button class="btn-refresh" onclick="location.reload()">Saya Sudah Matikan (Muat Ulang)</button>
+                </div>
+            `;
+        }
 
         // 1. Ambil Video dari Cloudflare Worker -> Supabase API
         async function loadVideosFromAPI() {
@@ -315,8 +361,7 @@
                 databaseVideosGlobal = videos || [];
                 jalankanFilterKatalog(true);
 
-                // Autoplay Video Pertama jika Tersedia
-                if (databaseVideosGlobal.length > 0) {
+                if (databaseVideosGlobal.length > 0 && !isAdBlockActive) {
                     playVidey(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
                 }
             } catch (error) {
@@ -324,13 +369,19 @@
             }
         }
 
-        // 2. Play Video via Direct HTML5 Video Player (CDN2 Videy)
+        // 2. Play Video via Direct HTML5 Video Player
         function playVidey(videyId, title) {
+            if (isAdBlockActive) {
+                blokirPlayerAksess();
+                return;
+            }
+
             const player = document.getElementById('videyPlayer');
             const source = document.getElementById('videoSource');
             const titleBox = document.getElementById('playingTitle');
 
-            // Mengarahkan langsung ke direct file MP4 di cdn2.videy.co
+            if (!player || !source) return;
+
             source.src = `https://cdn2.videy.co/${videyId}.mp4`;
             player.load();
             player.play().catch(e => console.log("Autoplay blocked by browser:", e));
@@ -357,12 +408,10 @@
 
             let videoTersaring = databaseVideosGlobal;
 
-            // Filter Kategori
             if (kategoriAktifGlobal !== 'semua') {
                 videoTersaring = videoTersaring.filter(v => (v.kategori || 'umum').toLowerCase() === kategoriAktifGlobal.toLowerCase());
             }
 
-            // Filter Search Query
             if (searchQuery) {
                 videoTersaring = videoTersaring.filter(v => v.title.toLowerCase().includes(searchQuery));
             }
@@ -373,12 +422,10 @@
                 return;
             }
 
-            // Hitung Pagination
             const totalHalaman = Math.ceil(videoTersaring.length / ITEM_PER_PAGE);
             const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
             const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAwal + ITEM_PER_PAGE);
 
-            // Render Card Video dengan Preview Frame Otomatis
             videoHalamanIni.forEach(video => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
@@ -440,8 +487,11 @@
             });
         }
 
-        // Jalankan saat pertama dimuat
-        loadVideosFromAPI();
+        // Inisialisasi: Cek AdBlocker dulu, baru load video
+        (async function() {
+            await checkAdBlocker();
+            loadVideosFromAPI();
+        })();
     </script>
 
     <!-- Histats.com  START  (aync)-->
