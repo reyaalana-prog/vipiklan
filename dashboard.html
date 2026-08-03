@@ -377,8 +377,9 @@
             const indeksAwal = (halamanAktifGlobal - 1) * ITEM_PER_PAGE;
             const videoHalamanIni = videoTersaring.slice(indeksAwal, indeksAwal + ITEM_PER_PAGE);
 
-            // Fallback SVG sebelum frame video tercapture
-            const placeholderSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="100%" height="100%" fill="%231e293b"/><circle cx="160" cy="90" r="24" fill="%23e50914"/><polygon points="154,80 172,90 154,100" fill="%23ffffff"/></svg>`;
+            // SVG Placeholder yang Aman (Di-encode agar tidak bentrok dengan kuotasi HTML)
+            const rawSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180"><rect width="100%" height="100%" fill="#1e293b"/><circle cx="160" cy="90" r="24" fill="#e50914"/><polygon points="154,80 172,90 154,100" fill="#ffffff"/></svg>`;
+            const placeholderSvg = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(rawSvg);
 
             videoHalamanIni.forEach((video, index) => {
                 const card = document.createElement('div');
@@ -387,7 +388,6 @@
 
                 const imgId = `thumb_img_${index}`;
 
-                // Hanya render elemen gambar thumbnail tanpa div .video-info (teks judul)
                 card.innerHTML = `
                     <div class="video-card-thumb-wrapper">
                         <img id="${imgId}" class="thumb-img" src="${placeholderSvg}" alt="Play">
@@ -395,7 +395,7 @@
                 `;
                 container.appendChild(card);
 
-                // Jalankan ekstraksi thumbnail otomatis dari file video
+                // Jalankan pencarian thumbnail frame
                 generateAutoThumbnail(video.videy_id, imgId);
             });
 
