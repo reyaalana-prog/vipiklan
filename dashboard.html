@@ -73,8 +73,8 @@
             font-weight: bold;
         }
 
-        /* OVERLAY KETIKA ADBLOCK / ADGUARD AKTIF */
-        .adblock-overlay {
+        /* OVERLAY DI DALAM AREA PLAYER (UNTUK ADBLOCK & VERIFIKASI UMUR) */
+        .player-overlay-box {
             position: absolute;
             top: 0;
             left: 0;
@@ -92,64 +92,21 @@
             z-index: 200;
         }
 
-        .adblock-overlay h3 { color: #e50914; margin-bottom: 10px; font-size: 18px; }
-        .adblock-overlay p { font-size: 13px; color: #ccc; max-width: 400px; margin-bottom: 15px; line-height: 1.5; }
-        .btn-refresh { background: #e50914; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-
-        /* MODAL VERIFIKASI UMUR (SMARTLINK ADSTERRA) */
-        .age-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .age-modal-box {
-            background: #1f1f1f;
-            border: 1px solid #333;
-            border-top: 4px solid #e50914;
-            border-radius: 12px;
-            padding: 25px 20px;
-            width: 90%;
-            max-width: 380px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        .age-modal-box h3 {
-            margin: 0 0 10px 0;
-            font-size: 20px;
-            color: #fff;
-        }
-
-        .age-modal-box p {
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .btn-verify-age {
-            width: 100%;
-            background: #e50914;
-            color: #fff;
-            border: none;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 6px;
+        .player-overlay-box h3 { color: #e50914; margin: 0 0 10px 0; font-size: 18px; }
+        .player-overlay-box p { font-size: 13px; color: #ccc; max-width: 420px; margin-bottom: 15px; line-height: 1.5; }
+        
+        .btn-overlay-action { 
+            background: #e50914; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            font-weight: bold; 
             cursor: pointer;
+            font-size: 13px;
             transition: 0.2s;
         }
-
-        .btn-verify-age:active { transform: scale(0.97); }
+        .btn-overlay-action:active { transform: scale(0.96); }
 
         /* 4. SLOT IKLAN RESPANSIF */
         .ad-slot-box {
@@ -323,15 +280,6 @@
 </head>
 <body onclick="triggerPopunderGlobal()">
 
-    <!-- MODAL VERIFIKASI UMUR ADSTERRA SMARTLINK -->
-    <div id="ageVerificationModal" class="age-modal-overlay">
-        <div class="age-modal-box">
-            <h3>🔞 Verifikasi Umur</h3>
-            <p>Konten ini dikhususkan untuk pengguna berusia 18 tahun ke atas. Klik tombol di bawah untuk melanjutkan pemutaran video.</p>
-            <button class="btn-verify-age" onclick="konfirmasiVerifikasiUmur()">SAYA BERUSIA 18+ TAHUN</button>
-        </div>
-    </div>
-
     <header>
         <h2>STREAMING<span>KU</span></h2>
         <a href="index.html" class="btn-home">🏠 Beranda</a>
@@ -383,8 +331,8 @@
     </div>
 
     <script>
-        // PASTA KODE SMARTLINK ADSTERRA KAMU DI SINI
-        const ADSTERRA_SMARTLINK = "https://researchingsweatexit.com/wjnm791b?key=9f807821993342169c2e6256ceaa74bf";
+        // SMARTLINK ADSTERRA KAMU
+        const ADSTERRA_SMARTLINK = "https://www.highrevenuegate.com/example_smartlink";
 
         let isAdBlockActive = false;
         let databaseVideosGlobal = []; 
@@ -392,7 +340,6 @@
         let halamanAktifGlobal = 1;
         const ITEM_PER_PAGE = 24;
 
-        // Variabel penampung video sementara sebelum verifikasi
         let pendingVideyId = "";
         let pendingTitle = "";
 
@@ -409,14 +356,11 @@
 
         function blokirPlayerAksess() {
             const playerContainer = document.getElementById('playerContainer');
-            const player = document.getElementById('videyPlayer');
-            if (player) player.pause();
-            
             playerContainer.innerHTML = `
-                <div class="adblock-overlay">
+                <div class="player-overlay-box">
                     <h3>⚠️ AdBlocker / AdGuard Terdeteksi</h3>
-                    <p>Mohon matikan AdBlocker / AdGuard di browser kamu untuk menonton video gratis di website ini.</p>
-                    <button class="btn-refresh" onclick="location.reload()">Saya Sudah Matikan (Muat Ulang)</button>
+                    <p>Mohon matikan AdBlocker / AdGuard di browser kamu untuk menonton video di website ini.</p>
+                    <button class="btn-overlay-action" onclick="location.reload()">Saya Sudah Matikan (Refresh)</button>
                 </div>
             `;
         }
@@ -432,7 +376,6 @@
                 databaseVideosGlobal = videos || [];
                 jalankanFilterKatalog(true);
 
-                // Load video pertama tanpa paksa verifikasi umur saat landing
                 if (databaseVideosGlobal.length > 0 && !isAdBlockActive) {
                     eksekusiPlayDirect(databaseVideosGlobal[0].videy_id, databaseVideosGlobal[0].title);
                 }
@@ -441,50 +384,62 @@
             }
         }
 
-        // 2. Memicu Modal Verifikasi Umur Setiap Memilih Video
+        // 2. Memicu Tampilan Verifikasi Umur Langsung di Dalam Video Player
         function playVidey(videyId, title) {
             if (isAdBlockActive) {
                 blokirPlayerAksess();
                 return;
             }
 
-            // Simpan data video target
             pendingVideyId = videyId;
             pendingTitle = title;
 
-            // Tampilkan Modal Verifikasi Umur
-            document.getElementById('ageVerificationModal').style.display = 'flex';
+            // Hentikan video player jika sedang berjalan
+            const existingVideo = document.getElementById('videyPlayer');
+            if (existingVideo) existingVideo.pause();
+
+            // Tampilkan Overlay Verifikasi Umur hanya di dalam kotak video
+            const playerContainer = document.getElementById('playerContainer');
+            playerContainer.innerHTML = `
+                <div class="player-overlay-box">
+                    <h3>🔞 Verifikasi Umur (18+)</h3>
+                    <p>Konten ini khusus dewasa. Klik tombol di bawah untuk verifikasi dan mulai menonton video.</p>
+                    <button class="btn-overlay-action" onclick="konfirmasiVerifikasiUmur()">SAYA BERUSIA 18+ TAHUN</button>
+                </div>
+            `;
+
+            document.getElementById('playingTitle').innerText = `▶️ ${title || 'Memutar Video'}`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Eksekusi Pemutaran Video setelah Verifikasi Klik
+        // Eksekusi Pemutaran Video Setelah Tombol Verifikasi Diklik
         function konfirmasiVerifikasiUmur() {
-            // Sembunyikan Modal
-            document.getElementById('ageVerificationModal').style.display = 'none';
-
-            // Open Smartlink Adsterra di Tab Baru
+            // Buka Smartlink Adsterra di Tab Baru
             if (ADSTERRA_SMARTLINK && ADSTERRA_SMARTLINK !== "https://www.highrevenuegate.com/example_smartlink") {
                 window.open(ADSTERRA_SMARTLINK, '_blank');
             }
 
-            // Putar Video Target di Tab Utama saat ini
+            // Kembalikan HTML Video Player & Putar Video di Tab Utama
             if (pendingVideyId) {
                 eksekusiPlayDirect(pendingVideyId, pendingTitle);
             }
         }
 
         function eksekusiPlayDirect(videyId, title) {
+            const playerContainer = document.getElementById('playerContainer');
+            
+            // Re-render HTML Video Player Native
+            playerContainer.innerHTML = `
+                <video id="videyPlayer" controls autoplay playsinline preload="metadata">
+                    <source id="videoSource" src="https://cdn2.videy.co/${videyId}.mp4" type="video/mp4">
+                    Browser kamu tidak mendukung pemutar video ini.
+                </video>
+            `;
+
             const player = document.getElementById('videyPlayer');
-            const source = document.getElementById('videoSource');
-            const titleBox = document.getElementById('playingTitle');
-
-            if (!player || !source) return;
-
-            source.src = `https://cdn2.videy.co/${videyId}.mp4`;
-            player.load();
             player.play().catch(e => console.log("Autoplay blocked by browser:", e));
 
-            titleBox.innerText = `▶️ ${title || 'Memutar Video'}`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('playingTitle').innerText = `▶️ ${title || 'Memutar Video'}`;
         }
 
         // 3. Filter & Render Katalog Video
@@ -584,7 +539,6 @@
             });
         }
 
-        // Inisialisasi: Cek AdBlocker dulu, baru load video
         (async function() {
             await checkAdBlocker();
             loadVideosFromAPI();
